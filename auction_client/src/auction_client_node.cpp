@@ -1,0 +1,26 @@
+
+
+#include "auction_client.hpp"
+
+
+
+int main(int argc, char** argv)
+{
+    ros::init(argc, argv, "auction_client");
+
+    ros::NodeHandle nh;
+
+    //auction_ns::Auction_client client = auction_ns::Auction_client();
+    auction_ns::Auction_client_uav client = auction_ns::Auction_client_uav();
+
+
+
+    client.spin_loop(50);
+
+
+
+    return 0;
+}
+
+
+
