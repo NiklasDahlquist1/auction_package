@@ -51,9 +51,12 @@ namespace auction_ns
         // callbacks
         void checkAvailableAuctionCB(const auction_msgs::auction& msg);
         void taskAllocatedCB(const auction_msgs::task_allocated& msg);
+        void taskAlreadyFinishedCB(const auction_msgs::task& msg); // servers sends finished tasks here, check so that the current task is not already finished
+
         
         ros::Subscriber availAbleAuctions_sub;
         ros::Subscriber taskAllocated_sub;
+        ros::Subscriber taskAlreadyFinished_sub;
 
 
 
@@ -66,6 +69,9 @@ namespace auction_ns
         auction_msgs::task_allocated currentTask;
 
 
+
+        void taskComplete(bool publishConfirmation);
+        void taskAssigned(const auction_msgs::task_allocated& msg);
 
  
         bool taskIsActive = false; // client has been allocated a task
@@ -112,75 +118,6 @@ namespace auction_ns
 
         //bt_project::auction_winner getCurrentTask();
     };
-
-
-
-
-/*
-    class Auction_client_bt : public Auction_client
-    {
-        private:
-
-        //BT
-        //factory, etc
-
-        // splitString()
-
-        // callbacks
-        void poseCB(const geometry_msgs::Pose& msg);
-
-        ros::Subscriber currentPose_sub;
-
-
-        void handleNewTask(auction_msgs::task task); // swtitch to bt for task, initialize new tree nodes, etc.
-        void handleNoTask(); // switch to no task bt
-        void executeCurrentBehavior(); // tick bt, also check if task is completed
-        taskStatus currentTaskStatus(); // check if task is completed, (maybe return bt status? in this case)
-
-        protected:
-
-        double costForTask(auction_msgs::task task); // return cost for task, (distance, cost from dsp, time, etc.)
-        // generate BT, initialize nodes etc.
-        // generate no task BT, init nodes...
-        // 
-
-        public:
-        using Auction_client::Auction_client;
-
-        Auction_client_bt(); // setup callbacks, state (used for bt), etc. here
-
-    };
-*/
-
-
-    class Auction_client_uav : public Auction_client
-    {
-        private:
-
-        geometry_msgs::Pose currentPose; // current pose needed to calculate distance for cost function, could be implemented as a service i.e asked for when needed?
-
-        // callbacks
-        void poseCB(const geometry_msgs::Pose& msg);
-
-        ros::Subscriber currentPose_sub;
-
-        protected:
-
-        double costForTask(auction_msgs::task task);
-        void handleNewTask(auction_msgs::task task);
-        void handleNoTask();
-        void executeCurrentBehavior();
-
-        public:
-        using Auction_client::Auction_client;
-
-        Auction_client_uav();
-
-    };
-
-
-
-    //TODO, implement client for for other types of agents
 
 
 

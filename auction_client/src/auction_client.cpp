@@ -21,7 +21,9 @@ namespace auction_ns
 
         availAbleAuctions_sub = nodeHandle.subscribe("auctionAvailable", 100, &Auction_client::checkAvailableAuctionCB, this);
         taskAllocated_sub = nodeHandle.subscribe("allocatedTasks", 100, &Auction_client::taskAllocatedCB, this);
-        
+        taskAlreadyFinished_sub = nodeHandle.subscribe("confirmTaskFinished", 100, &Auction_client::taskAlreadyFinishedCB, this);
+
+
     }
     Auction_client::~Auction_client()
     {
@@ -76,7 +78,6 @@ namespace auction_ns
     void Auction_client::updateLogic()
     {
         //std::cout << "updateLogic" << std::endl;
-
         if(auctionIsNew == true) // TODO, add so that if a task cannot be reallocated the client should not place new bids (AND taskCanBeReallocated or something)
         {
             // send bid
@@ -124,12 +125,37 @@ namespace auction_ns
 
         if(taskIsCompleted == true)
         {
-            auctionFinished_pub.publish(currentTask.task); // confirm to the auction server that the current task is completed
-            taskIsActive = false;
-            //taskIsNew = true; // switch behavior to noTask()
-            reloadNoTask = true;
-            taskIsCompleted = false;
+            taskComplete(true);
         }
+    }
+
+    void Auction_client::taskComplete(bool publishConfirmation)
+    {
+        if(publishConfirmation == true)
+        {
+            auctionFinished_pub.publish(currentTask.task); // confirm to the auction server that the current task is completed
+        }
+        taskIsActive = false;
+        //taskIsNew = true; // switch behavior to noTask()
+        reloadNoTask = true;
+        taskIsCompleted = false;
+    }
+
+
+    void Auction_client::taskAssigned(const auction_msgs::task_allocated& msg)
+    {
+        // check if a new task is allocated
+        if(currentTask.task != msg.task)
+        {
+            taskIsNew = true; 
+        }
+
+        currentTask = msg;
+        //set this task as active
+        taskIsActive = true;
+        taskIsCompleted = false;
+
+        isAllocatedToAnyTask = true;
     }
 
 
@@ -167,18 +193,7 @@ namespace auction_ns
         //check if the name of the allocated client is this one
         if(name == msg.agent_name)
         {
-            // check if a new task is allocated
-            if(currentTask.task != msg.task)
-            {
-                taskIsNew = true; 
-            }
-
-            currentTask = msg;
-            //set this task as active
-            taskIsActive = true;
-            taskIsCompleted = false;
-
-            isAllocatedToAnyTask = true;
+            taskAssigned(msg);
         }
         else if (msg.task == currentTask.task) // someone else is assigned the current task
         {
@@ -194,42 +209,33 @@ namespace auction_ns
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // TODO, move to another file?
-    void Auction_client_uav::handleNewTask(auction_msgs::task task)
+    void Auction_client::taskAlreadyFinishedCB(const auction_msgs::task& msg)
     {
-        std::cout << "handle new task" << std::endl;
+        std::cout << "test: RECIEVED TASK FINISNNNG" << std::endl;
+
+        // no current task, return
+        if(taskIsActive == false)
+        {
+            return;
+        }
+
+        // someone else finished current task
+        if(msg == currentTask.task)
+        {
+            taskComplete(false); // no need to publish, task already finished
+        }
+
     }
 
-    void Auction_client_uav::handleNoTask()
-    {
-        std::cout << "handle no task" << std::endl;
-    }
-    void Auction_client_uav::executeCurrentBehavior()
-    {
-        std::cout << "execute current behavior" << std::endl;
-    }
-    double Auction_client_uav::costForTask(auction_msgs::task task)
-    {
-        return 1;
-    }
 
-    Auction_client_uav::Auction_client_uav() //: Auction_client::Auction_client()
-    {
-        std::cout << "hej" << std::endl;
-    }
+
+
+
+
+
+
+
+
 
 
 } // namespace auction_ns

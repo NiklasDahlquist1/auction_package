@@ -15,8 +15,12 @@ float64 reward
 
 bool can_be_abandoned
 
+#bool forSpecificAgent
+#string/int agent_name/agent_id
 
-#bool can_be_reallocated_no_respons # how to handle
+
+
+#bool can_be_reallocated_no_respons # how to handle, maybe send task (delete from server) on allocation. and allow clients to have a list of internal tasks
 
 
 # add some way to say what/how many robots that are required (for use later?)

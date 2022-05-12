@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     //auction_ns::Auction_client client = auction_ns::Auction_client();
-    auction_ns::Auction_client_uav client = auction_ns::Auction_client_uav();
+    auction_ns::Auction_client client = auction_ns::Auction_client();
 
 
 
