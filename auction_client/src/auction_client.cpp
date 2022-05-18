@@ -11,13 +11,15 @@ namespace auction_ns
     {
         std::cout << "Auction_client" << std::endl;
         name = ros::this_node::getName();
+        client_ID = 1337;
         //std::cout << "Client started, node: " << name << std::endl;
 
         //TODO, set ID here (somehow, maybe get from auction server?) not used for now?
 
         
         auction_bid_pub = nodeHandle.advertise<auction_msgs::bid>("submitBid", 1000);
-        auctionFinished_pub = nodeHandle.advertise<auction_msgs::task>("confirmTaskFinished", 1000);
+        auctionFinished_pub = nodeHandle.advertise<auction_msgs::task_allocated>("confirmTaskFinished", 1000);
+        taskResult_pub = nodeHandle.advertise<auction_msgs::task_result>("taskResult", 1000);
 
         availAbleAuctions_sub = nodeHandle.subscribe("auctionAvailable", 100, &Auction_client::checkAvailableAuctionCB, this);
         taskAllocated_sub = nodeHandle.subscribe("allocatedTasks", 100, &Auction_client::taskAllocatedCB, this);
@@ -34,8 +36,8 @@ namespace auction_ns
     {
         auction_msgs::bid bid;
 
-        bid.agent_name = ros::this_node::getName();
-        bid.agent_ID = 1337;
+        bid.agent_name = name;
+        bid.agent_ID = client_ID;
         bid.auction_ID = auction.auction_ID;
 
         for(auction_msgs::task t : auction.tasks.tasks)
@@ -133,12 +135,26 @@ namespace auction_ns
     {
         if(publishConfirmation == true)
         {
-            auctionFinished_pub.publish(currentTask.task); // confirm to the auction server that the current task is completed
+            auctionFinished_pub.publish(currentTask); // confirm to the auction server that the current task is completed
         }
         taskIsActive = false;
         //taskIsNew = true; // switch behavior to noTask()
         reloadNoTask = true;
         taskIsCompleted = false;
+    }
+
+
+    // call to publish result related to the current task
+    void Auction_client::publishTaskResultCurrentTask(std::string result)
+    {
+        auction_msgs::task_result task_res;
+        task_res.task = currentTask.task;
+        task_res.agent_ID_result = client_ID;
+        task_res.agent_name_result = name;
+        task_res.result_time = ros::Time::now();
+        task_res.result = result;
+
+        taskResult_pub.publish(task_res);
     }
 
 
@@ -209,9 +225,9 @@ namespace auction_ns
 
 
 
-    void Auction_client::taskAlreadyFinishedCB(const auction_msgs::task& msg)
+    void Auction_client::taskAlreadyFinishedCB(const auction_msgs::task_allocated& msg)
     {
-        std::cout << "test: RECIEVED TASK FINISNNNG" << std::endl;
+        //std::cout << "test: RECIEVED TASK FINISNNNG" << std::endl;
 
         // no current task, return
         if(taskIsActive == false)
@@ -220,11 +236,10 @@ namespace auction_ns
         }
 
         // someone else finished current task
-        if(msg == currentTask.task)
+        if(msg.task == currentTask.task)
         {
             taskComplete(false); // no need to publish, task already finished
         }
-
     }
 
 

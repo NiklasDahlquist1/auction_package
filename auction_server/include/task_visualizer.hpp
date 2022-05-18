@@ -54,7 +54,7 @@ namespace task_visualization
         void newAuction(const auction_msgs::auction& msg);
         void taskAdded(const auction_msgs::taskArray& msg);
         void taskAllocated(const auction_msgs::task_allocated& msg);
-        void taskFinished(const auction_msgs::task& msg);
+        void taskFinished(const auction_msgs::task_allocated& msg);
 
 
 
@@ -272,17 +272,17 @@ namespace task_visualization
     {
         currentlyAllocatedTasks[msg.task.task_ID] = msg;
     }
-    void Task_visualizer::taskFinished(const auction_msgs::task& msg)
+    void Task_visualizer::taskFinished(const auction_msgs::task_allocated& msg)
     {
-        allFinishedTasks.push_back(msg);
+        allFinishedTasks.push_back(msg.task);
 
 
-        currentlyAllocatedTasks.erase(msg.task_ID);
+        currentlyAllocatedTasks.erase(msg.task.task_ID);
 
 
         for(auto pair : tasksCurrentlyNotFinished)
         {
-            if(pair.first == msg.task_ID)
+            if(pair.first == msg.task.task_ID)
             {
                 tasksCurrentlyNotFinished.erase(pair.first);
                 break;

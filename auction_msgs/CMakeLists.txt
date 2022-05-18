@@ -58,7 +58,7 @@ find_package(
 
     task_allocated.msg
     task_finished.msg
-    
+    task_result.msg
 #  
 #   Message1.msg
 #   Message2.msg

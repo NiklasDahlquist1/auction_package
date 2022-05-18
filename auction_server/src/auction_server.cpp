@@ -10,6 +10,7 @@ namespace auction_ns
     {
         auctionAvailable_pub = nodeHandle.advertise<auction_msgs::auction>("auctionAvailable", 1000);
         auctionWinners_pub = nodeHandle.advertise<auction_msgs::task_allocated>("allocatedTasks", 1000);
+        taskFinished_pub = nodeHandle.advertise<auction_msgs::task_allocated>("confirmTaskFinished", 1000);
 
 
 
@@ -114,15 +115,16 @@ namespace auction_ns
         // TODO: maybe check so that ID is unique?
 
 
-
+/*
         std::cout << "tasks in queue:" << std::endl;
         for(auto t : taskQueue)
         {
             std::cout << "    task name: " << t.task.task_name << std::endl;
         }
+*/
     }
 
-    void Auction_server::taskFinishedCB(const auction_msgs::task& msg)
+    void Auction_server::taskFinishedCB(const auction_msgs::task_allocated& msg)
     {
         task_allocated taskToRemove;
         bool removeFound = false;
@@ -130,7 +132,20 @@ namespace auction_ns
         {
             //maybe we should check who sent this?
 
-            if(t.task == msg)
+
+
+            // TODO: handle if the task is allocated to another client?
+            if(t.allocated == true)
+            {
+                if(t.allocatedTo != t.allocatedTo)
+                {
+                    // publish task finished again to allow for the agent to drop the task?
+                    taskFinished_pub.publish(msg);
+                }   
+
+            }
+
+            if(t.task == msg.task)
             {
                 removeFound = true;
                 taskToRemove = t;
@@ -193,9 +208,15 @@ namespace auction_ns
         auction_msgs::auction auctionForAssigning;
         auctionForAssigning.auction_ID = activeAuction.auction_ID;
         auctionForAssigning.header = activeAuction.header;
-        for(task_allocated t : taskQueue)
+        for(task_allocated& t : taskQueue)
         {
-            // TODO, filter out some tasks depending on if the current owner has responded or not, if it can be reassign or not, etc.
+            // TODO, filter out some tasks depending on if the current owner has responded or not, if it can be reassign or not, etc. 
+
+            // TODO: should we set all tasks that are up for auctioning to be "not allocated"
+            t.allocated = false;
+            t.allocatedTo = "";
+
+
             auctionForAssigning.tasks.tasks.push_back(t.task);
         }
 
@@ -210,7 +231,7 @@ namespace auction_ns
 
 
 
-        // TODO: check here if this task has been finished while waitng. if so, ignore bids for it
+
 
         // maybe not optimal?
         // do for each recieved bid
@@ -264,6 +285,8 @@ namespace auction_ns
         std::cout << "Auction round ended, " << bidsCurrentAuction.size() << " bids received" << std::endl;
 
 
+
+
         for(int i = 0; i < winners.size(); ++i)
         {
             if(winners[i] > -0.5)
@@ -278,6 +301,19 @@ namespace auction_ns
                 task_allocated.time_allocated = ros::Time::now();
 
                 auctionWinners_pub.publish(task_allocated);
+
+
+
+
+                std::list<auction_ns::Auction_server::task_allocated>::iterator it;
+                auction_ns::Auction_server::task_allocated t_win;
+                t_win.task = auctionForAssigning.tasks.tasks[winners[i]];
+                it = std::find(taskQueue.begin(), taskQueue.end(), t_win);
+
+                (*it).allocated = true;
+                it->allocatedTo = bidsCurrentAuction[i].agent_name;
+
+
                 // TODO: check here if this task has been finished while waitng?
             }
         }
@@ -286,6 +322,21 @@ namespace auction_ns
         bidsCurrentAuction.erase(bidsCurrentAuction.begin(), bidsCurrentAuction.end());
 
 
+
+
+        std::cout << "currently task queue status: " << std::endl;
+        for(const auction_ns::Auction_server::task_allocated& t : taskQueue)
+        {
+            std::cout << "  task: " << t.task.task_name << ", " << t.task.task_data << ". ";
+            if(t.allocated == true)
+            {
+                std::cout << "Allocated to: " << t.allocatedTo << std::endl;
+            }
+            else
+            {
+                std::cout << "Not allocated." << std::endl;
+            }
+        }
 
 
         return;

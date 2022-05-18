@@ -15,6 +15,8 @@
 #include "auction_msgs/taskArray.h"
 #include "auction_msgs/task_allocated.h"
 #include "auction_msgs/task_finished.h"
+#include "auction_msgs/task_result.h"
+
 
 #include "std_msgs/String.h"
 #include "geometry_msgs/Pose.h"
@@ -45,13 +47,14 @@ namespace auction_ns
 
         ros::Publisher auction_bid_pub;
         ros::Publisher auctionFinished_pub;
+        ros::Publisher taskResult_pub;
         //ros::Publisher auction_taskAvailable_pub;
 
 
         // callbacks
         void checkAvailableAuctionCB(const auction_msgs::auction& msg);
         void taskAllocatedCB(const auction_msgs::task_allocated& msg);
-        void taskAlreadyFinishedCB(const auction_msgs::task& msg); // servers sends finished tasks here, check so that the current task is not already finished
+        void taskAlreadyFinishedCB(const auction_msgs::task_allocated& msg); // servers sends finished tasks here, check so that the current task is not already finished
 
         
         ros::Subscriber availAbleAuctions_sub;
@@ -62,6 +65,7 @@ namespace auction_ns
 
         std::vector<int> ignoreIDs;    
         std::string name;
+        int client_ID;
 
         
 
@@ -69,11 +73,9 @@ namespace auction_ns
         auction_msgs::task_allocated currentTask;
 
 
+        void publishTaskResultCurrentTask(std::string result);
 
-        void taskComplete(bool publishConfirmation);
-        void taskAssigned(const auction_msgs::task_allocated& msg);
-
- 
+    
         bool taskIsActive = false; // client has been allocated a task
         bool taskIsCompleted = false;
         bool auctionAvailableHasBeenSet = false;
@@ -92,6 +94,8 @@ namespace auction_ns
         };
 
 
+        void taskComplete(bool publishConfirmation);
+        void taskAssigned(const auction_msgs::task_allocated& msg);
 
         void createAndSendBid(auction_msgs::auction auction);
 

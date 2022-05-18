@@ -50,6 +50,7 @@ namespace auction_ns
 
         ros::Publisher auctionAvailable_pub;
         ros::Publisher auctionWinners_pub;
+        ros::Publisher taskFinished_pub;
         //ros::Publisher auction_return_pub;
 
         int auctionIDCounter = 0; // count ID for published auctions
@@ -76,7 +77,7 @@ namespace auction_ns
         void bidsCB(const auction_msgs::bid& msg);
         void addTasksCB(const auction_msgs::taskArray& msg);
         //void newOrderedListTasksVB() // used for adding a list of tasks to be finished in a sequence, offer the next when one is reported finished
-        void taskFinishedCB(const auction_msgs::task& msg);
+        void taskFinishedCB(const auction_msgs::task_allocated& msg);
         void newClientCB(const std_msgs::String& msg); // maybe use these clients to check things (like if they have submitted a bid or not?)
         //TODO, add callback to register clients. Also, add a way to end an auction if all clients have submitted (also a flag to enable/disable)
 
