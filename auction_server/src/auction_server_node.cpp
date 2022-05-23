@@ -16,6 +16,9 @@ int main(int argc, char** argv)
     if (!nh_private.getParam ("serverUpdateRate", serverUpdateRate))
         serverUpdateRate = 200;
 
+
+        
+
     std::cout << "Using auctionRoundTime = " << auctionRoundTime << " and serverUpdateRate = " << serverUpdateRate << std::endl;
 
 

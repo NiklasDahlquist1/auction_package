@@ -100,7 +100,8 @@ namespace auction_ns
         void createAndSendBid(auction_msgs::auction auction);
 
 
-        virtual double costForTask(auction_msgs::task task);
+        virtual void costForTasks(const std::vector<auction_msgs::task>& tasks, std::vector<auction_msgs::price_bid>& pricesToFill);
+        //virtual double costForTask(auction_msgs::task task);
         virtual void handleNewTask(auction_msgs::task task);
         virtual void handleNoTask();
         virtual void executeCurrentBehavior();

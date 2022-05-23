@@ -27,3 +27,7 @@ bool can_be_abandoned
 
 
 
+#bool useIncreasingReward
+#float64 rewardIncrease # maybe make more general later?
+
+

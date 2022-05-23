@@ -17,13 +17,13 @@ namespace auction_ns
         //TODO, set ID here (somehow, maybe get from auction server?) not used for now?
 
         
-        auction_bid_pub = nodeHandle.advertise<auction_msgs::bid>("submitBid", 1000);
-        auctionFinished_pub = nodeHandle.advertise<auction_msgs::task_allocated>("confirmTaskFinished", 1000);
-        taskResult_pub = nodeHandle.advertise<auction_msgs::task_result>("taskResult", 1000);
+        auction_bid_pub = nodeHandle.advertise<auction_msgs::bid>("/submitBid", 1000);
+        auctionFinished_pub = nodeHandle.advertise<auction_msgs::task_allocated>("/confirmTaskFinished", 1000);
+        taskResult_pub = nodeHandle.advertise<auction_msgs::task_result>("/taskResult", 1000);
 
-        availAbleAuctions_sub = nodeHandle.subscribe("auctionAvailable", 100, &Auction_client::checkAvailableAuctionCB, this);
-        taskAllocated_sub = nodeHandle.subscribe("allocatedTasks", 100, &Auction_client::taskAllocatedCB, this);
-        taskAlreadyFinished_sub = nodeHandle.subscribe("confirmTaskFinished", 100, &Auction_client::taskAlreadyFinishedCB, this);
+        availAbleAuctions_sub = nodeHandle.subscribe("/auctionAvailable", 100, &Auction_client::checkAvailableAuctionCB, this);
+        taskAllocated_sub = nodeHandle.subscribe("/allocatedTasks", 100, &Auction_client::taskAllocatedCB, this);
+        taskAlreadyFinished_sub = nodeHandle.subscribe("/confirmTaskFinished", 100, &Auction_client::taskAlreadyFinishedCB, this);
 
 
     }
@@ -40,6 +40,10 @@ namespace auction_ns
         bid.agent_ID = client_ID;
         bid.auction_ID = auction.auction_ID;
 
+
+        costForTasks(auction.tasks.tasks, bid.prices);
+
+/*
         for(auction_msgs::task t : auction.tasks.tasks)
         {
             auction_msgs::price_bid p;
@@ -48,7 +52,7 @@ namespace auction_ns
             
             bid.prices.push_back(p);
         }
-
+*/
         auction_bid_pub.publish(bid);
     }
 
@@ -66,10 +70,14 @@ namespace auction_ns
     {
         std::cout << "execute current behavior not implemented" << std::endl;
     }
-    double Auction_client::costForTask(auction_msgs::task task)
+/*    double Auction_client::costForTask(auction_msgs::task task)
     {
         std::cout << "cost for task function not implemented" << std::endl;
         return -1;
+    }*/
+    void Auction_client::costForTasks(const std::vector<auction_msgs::task>& tasks, std::vector<auction_msgs::price_bid>& pricesToFill)
+    {
+        return;
     }
     Auction_client::taskStatus Auction_client::currentTaskStatus()
     {
