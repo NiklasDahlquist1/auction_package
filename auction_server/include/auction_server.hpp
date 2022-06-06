@@ -51,6 +51,7 @@ namespace auction_ns
         ros::Publisher auctionAvailable_pub;
         ros::Publisher auctionWinners_pub;
         ros::Publisher taskFinished_pub;
+        ros::Publisher taskNotAllocated_pub;
         //ros::Publisher auction_return_pub;
 
         int auctionIDCounter = 0; // count ID for published auctions

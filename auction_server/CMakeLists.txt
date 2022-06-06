@@ -250,6 +250,11 @@ add_dependencies(task_adder ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTE
 target_link_libraries(task_adder ${catkin_LIBRARIES})
 
 
+add_executable(task_adder_grid
+    src/task_adder_grid.cpp
+)
+add_dependencies(task_adder_grid ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(task_adder_grid ${catkin_LIBRARIES})
 
 
 

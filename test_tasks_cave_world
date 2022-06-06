@@ -1,0 +1,178 @@
+
+rostopic pub /addTasks auction_msgs/taskArray "tasks:
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-54.7;-66.3;2'
+  task_ID: 500
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-36.5;0.4;2'
+  task_ID: 501
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-26;-18.6;2'
+  task_ID: 502
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-32;21;2'
+  task_ID: 503
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-36.1;-60.1;2'
+  task_ID: 504
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '13.6;29.8.52;2'
+  task_ID: 506
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '13.2;49.2;2'
+  task_ID: 507
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-19.9;0.5;2'
+  task_ID: 508
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-26.2;10.6;2'
+  task_ID: 509
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-8;24;2'
+  task_ID: 510
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-11;-19.4;2'
+  task_ID: 511
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '19.4;0.2;2'
+  task_ID: 512
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-26.5;-46.8;2'
+  task_ID: 513
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-25.03;26.42;2'
+  task_ID: 514
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-26.48;45.17;2'
+  task_ID: 515
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false
+- task_type: ''
+  task_name: 'moveTo2D'
+  task_data: '-5.1;57.0;2'
+  task_ID: 516
+  creator_name: ''
+  creator_ID: 0
+  created_time: {secs: 0, nsecs: 0}
+  min_price: 0.0
+  max_price: 0.0
+  reward: 0.0
+  can_be_abandoned: false"

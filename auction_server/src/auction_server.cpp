@@ -11,7 +11,7 @@ namespace auction_ns
         auctionAvailable_pub = nodeHandle.advertise<auction_msgs::auction>("auctionAvailable", 1000);
         auctionWinners_pub = nodeHandle.advertise<auction_msgs::task_allocated>("allocatedTasks", 1000);
         taskFinished_pub = nodeHandle.advertise<auction_msgs::task_allocated>("confirmTaskFinished", 1000);
-
+        taskNotAllocated_pub = nodeHandle.advertise<std_msgs::String>("notAllocated", 1000);
 
 
         addTasks_sub = nodeHandle.subscribe("addTasks", 100, &Auction_server::addTasksCB, this);
@@ -59,7 +59,7 @@ namespace auction_ns
         if(auctionRunning)
         {
             double currentTime = ros::Time::now().toSec();
-            if(activeAuction.header.stamp.toSec() + auctionRoundTime <= currentTime) //TODO
+            if(activeAuction.header.stamp.toSec() + auctionRoundTime <= currentTime || bidsCurrentAuction.size() >= 3) //TODO
             {
                 declareWinner();
                 auctionRunning = false;
@@ -205,6 +205,10 @@ namespace auction_ns
 
         // TODO: do we handle min/max costs here?
 
+        std::vector<std::string> agentsThatAreAllocated; // can we make this nicer?
+        std::vector<std::string> agentsThatWasAllocated; // for checking if an agent lost his task and is no longer assigned to any
+
+
         auction_msgs::auction auctionForAssigning;
         auctionForAssigning.auction_ID = activeAuction.auction_ID;
         auctionForAssigning.header = activeAuction.header;
@@ -212,7 +216,13 @@ namespace auction_ns
         {
             // TODO, filter out some tasks depending on if the current owner has responded or not, if it can be reassign or not, etc. 
 
-            // TODO: should we set all tasks that are up for auctioning to be "not allocated"
+
+            // save name of agents that already had a task allocated
+            if(t.allocated == true)
+            {
+                agentsThatWasAllocated.push_back(t.allocatedTo);
+            }
+            // we set all tasks that are up for auctioning to be "not allocated"
             t.allocated = false;
             t.allocatedTo = "";
 
@@ -231,6 +241,12 @@ namespace auction_ns
 
 
 
+        // create rewards vector
+        std::vector<double> rewards(tasks_num);
+        for(int j = 0; j < tasks_num; ++j)
+        {
+            rewards[j] = auctionForAssigning.tasks.tasks[j].reward;
+        }
 
 
         // maybe not optimal?
@@ -270,7 +286,7 @@ namespace auction_ns
 
 
         std::vector<double> winners(workers_num);
-        winners = operations_research::taskMatching(costs); //use the matching optimization
+        winners = operations_research::taskMatching(costs, rewards); //use the matching optimization
 
 
 
@@ -283,6 +299,10 @@ namespace auction_ns
 */
 
         std::cout << "Auction round ended, " << bidsCurrentAuction.size() << " bids received" << std::endl;
+
+
+
+
 
 
 
@@ -310,13 +330,45 @@ namespace auction_ns
                 t_win.task = auctionForAssigning.tasks.tasks[winners[i]];
                 it = std::find(taskQueue.begin(), taskQueue.end(), t_win);
 
+
+
                 (*it).allocated = true;
                 it->allocatedTo = bidsCurrentAuction[i].agent_name;
+
+                agentsThatAreAllocated.push_back(bidsCurrentAuction[i].agent_name);
+                
 
 
                 // TODO: check here if this task has been finished while waitng?
             }
         }
+        
+
+        //check if the agents ( with task that changed client) are assigned to another task, if not publish "assigned to no task"
+        for(const std::string& n : agentsThatWasAllocated)
+        {
+            bool assignedToAnotherTask = false;
+            for(const std::string& assigned : agentsThatAreAllocated)
+            {
+                if(n == assigned)
+                {
+                    assignedToAnotherTask = true;
+                    break;
+                }
+            }
+
+            if(assignedToAnotherTask == false)
+            {
+                // publish something
+                std_msgs::String str;
+                str.data = n;
+                taskNotAllocated_pub.publish(str);
+            }
+        }
+
+
+
+
 
         //clear all bids
         bidsCurrentAuction.erase(bidsCurrentAuction.begin(), bidsCurrentAuction.end());
@@ -327,14 +379,15 @@ namespace auction_ns
         std::cout << "currently task queue status: " << std::endl;
         for(const auction_ns::Auction_server::task_allocated& t : taskQueue)
         {
-            std::cout << "  task: " << t.task.task_name << ", " << t.task.task_data << ". ";
+            
             if(t.allocated == true)
             {
+                std::cout << "  task (reward: " << t.task.reward << "): " << t.task.task_name << ", " << t.task.task_data << ". ";
                 std::cout << "Allocated to: " << t.allocatedTo << std::endl;
             }
             else
             {
-                std::cout << "Not allocated." << std::endl;
+                //std::cout << "Not allocated." << std::endl;
             }
         }
 

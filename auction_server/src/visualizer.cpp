@@ -21,6 +21,7 @@ int main(int argc, char** argv)
 
             visualizer.pubMarkers();
             visualizer.pubCurrentlyNotFinishedTasks();
+            visualizer.pubCurrentlyAllocatedTasks();
             rate.sleep();
         }
 

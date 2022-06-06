@@ -18,7 +18,8 @@ namespace operations_research
   // task matching, assigns the maximum number of tasks at the minimum cost
   // cost[i][j], i=worker, j=cost associated with task j
   // returns array result[i] with task associated with each worker i. if -1 that worker has no task assigned
-  std::vector<double> taskMatching(std::vector<std::vector<double>> costs)
+  // rewards[j], reward associated with finishing task j
+  std::vector<double> taskMatching(std::vector<std::vector<double>> costs, const std::vector<double>& rewards)
   {
     const int num_workers = costs.size();
     const int num_tasks = costs[0].size();
@@ -115,7 +116,7 @@ namespace operations_research
       {
         if(costs[i][j] > 0)
         {
-          objective->SetCoefficient(x[i][j], costs[i][j]);
+          objective->SetCoefficient(x[i][j], costs[i][j] + rewards[j]);
         }
       }
     }

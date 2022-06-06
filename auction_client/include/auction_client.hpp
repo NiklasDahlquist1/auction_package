@@ -55,11 +55,14 @@ namespace auction_ns
         void checkAvailableAuctionCB(const auction_msgs::auction& msg);
         void taskAllocatedCB(const auction_msgs::task_allocated& msg);
         void taskAlreadyFinishedCB(const auction_msgs::task_allocated& msg); // servers sends finished tasks here, check so that the current task is not already finished
+        void taskNoLongerAllocatedCB(const std_msgs::String& msg); // if client was allocated to a task and is now not allocated to any task, servers sends here
+
 
         
         ros::Subscriber availAbleAuctions_sub;
         ros::Subscriber taskAllocated_sub;
         ros::Subscriber taskAlreadyFinished_sub;
+        ros::Subscriber taskNoLongerAllocated_sub;
 
 
 

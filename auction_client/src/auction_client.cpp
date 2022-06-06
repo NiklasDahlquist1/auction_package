@@ -25,6 +25,7 @@ namespace auction_ns
         taskAllocated_sub = nodeHandle.subscribe("/allocatedTasks", 100, &Auction_client::taskAllocatedCB, this);
         taskAlreadyFinished_sub = nodeHandle.subscribe("/confirmTaskFinished", 100, &Auction_client::taskAlreadyFinishedCB, this);
 
+        taskNoLongerAllocated_sub = nodeHandle.subscribe("/notAllocated", 100, &Auction_client::taskNoLongerAllocatedCB, this);
 
     }
     Auction_client::~Auction_client()
@@ -246,7 +247,7 @@ namespace auction_ns
         // someone else finished current task
         if(msg.task == currentTask.task)
         {
-            taskComplete(false); // no need to publish, task already finished
+            taskComplete(false); // no need to publish, task already finished by someone else
         }
     }
 
@@ -254,7 +255,13 @@ namespace auction_ns
 
 
 
-
+    void Auction_client::taskNoLongerAllocatedCB(const std_msgs::String& msg)
+    {
+        if(msg.data == this->name)
+        {
+            taskComplete(false); // no longer assigned to this task
+        }
+    }
 
 
 

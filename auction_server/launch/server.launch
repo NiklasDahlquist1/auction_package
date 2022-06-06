@@ -3,7 +3,7 @@
 
 
     <node name="auction_server" type="auction_server" pkg="auction_server" output="screen">
-        <param name="auctionRoundTime" type="Double" value="0.5" />
+        <param name="auctionRoundTime" type="Double" value="0.2" />
         <param name="serverUpdateRate" type="Double" value="200" />
     </node>
 

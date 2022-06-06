@@ -40,7 +40,7 @@ namespace task_visualization
         // pub 
         ros::Publisher currentAuctionTasks_pub;
         ros::Publisher addedtasks_pub;
-        ros::Publisher activeTasks_pub; // tasks that are actively allocated?
+        ros::Publisher tasksCurrentlyAllocated_pub; // tasks that are actively allocated?
         ros::Publisher finishedTasks_pub;
         ros::Publisher tasksNotFinished_pub;
 
@@ -75,6 +75,8 @@ namespace task_visualization
         void pubAlltasksAdded();
         void pubFinishedTasks();
         void pubMarkers();
+
+        void pubCurrentlyAllocatedTasks();
 
     };
 
@@ -120,9 +122,9 @@ namespace task_visualization
         allAdded.pose.orientation.y = 0.0;
         allAdded.pose.orientation.z = 0.0;
         allAdded.pose.orientation.w = 1.0;
-        allAdded.scale.x = 0.25;
-        allAdded.scale.y = 0.25;
-        allAdded.scale.z = 0.25 ;
+        allAdded.scale.x = 0.75;
+        allAdded.scale.y = 0.75;
+        allAdded.scale.z = 0.4;
         allAdded.color.a = 0.95;
         allAdded.color.r = 0.0;
         allAdded.color.g = 1.0;
@@ -173,15 +175,81 @@ namespace task_visualization
         allAdded.pose.orientation.y = 0.0;
         allAdded.pose.orientation.z = 0.0;
         allAdded.pose.orientation.w = 1.0;
-        allAdded.scale.x = 0.25;
-        allAdded.scale.y = 0.25;
-        allAdded.scale.z = 0.25 ;
+        allAdded.scale.x = 0.75;
+        allAdded.scale.y = 0.75;
+        allAdded.scale.z = 0.4;
         allAdded.color.a = 0.95;
         allAdded.color.r = 1.0;
         allAdded.color.g = 0.0;
         allAdded.color.b = 0.0;
         allAdded.points = task_pos;
         tasksNotFinished_pub.publish(allAdded);
+    }
+
+
+
+    void Task_visualizer::pubCurrentlyAllocatedTasks()
+    {
+
+        // all not finished
+        visualization_msgs::Marker allAdded;
+
+        
+        std::vector<geometry_msgs::Point> task_pos;
+
+        for(auto pair : currentlyAllocatedTasks)
+        {
+            if(pair.second.task.task_name == "moveTo" || pair.second.task.task_name == "moveTo2D")
+            {
+                geometry_msgs::Point point;
+                auto parts = splitString(pair.second.task.task_data, ';');
+                point.x = std::stod(parts[0]);
+                point.y = std::stod(parts[1]);
+                point.z = std::stod(parts[2]);
+                task_pos.push_back(point);
+            }
+
+        }
+        //allAdded.lifetime
+        allAdded.header.frame_id = "world";
+        allAdded.header.stamp = ros::Time::now();
+        allAdded.ns = "auction_visualizer";
+        allAdded.id = 1;
+        allAdded.type = visualization_msgs::Marker::CUBE_LIST;
+        allAdded.action = visualization_msgs::Marker::ADD;
+        allAdded.pose.position.x = 0;
+        allAdded.pose.position.y = 0;
+        allAdded.pose.position.z = 0.01;
+        allAdded.pose.orientation.x = 0.0;
+        allAdded.pose.orientation.y = 0.0;
+        allAdded.pose.orientation.z = 0.0;
+        allAdded.pose.orientation.w = 1.0;
+        allAdded.scale.x = 1.5;
+        allAdded.scale.y = 1.5;
+        allAdded.scale.z = 1;
+        allAdded.color.a = 0.95;
+        allAdded.color.r = 0.0;
+        allAdded.color.g = 0.0;
+        allAdded.color.b = 1.0;
+        allAdded.points = task_pos;
+        tasksCurrentlyAllocated_pub.publish(allAdded);
+
+        // todo: make this much better. now, clear all tasks every x secs....
+        static double lastClearTime = ros::Time::now().toSec();
+        double timeNow = ros::Time::now().toSec();
+        if((timeNow - lastClearTime) > 1)
+        {
+            lastClearTime = timeNow;
+            std::vector<int> ids;
+            for(auto remove : currentlyAllocatedTasks)
+            {
+                ids.push_back(remove.first);
+            }
+            for(int i : ids)
+            {
+                currentlyAllocatedTasks.erase(i);
+            }
+        }
     }
 
 
@@ -242,7 +310,7 @@ namespace task_visualization
         ros::NodeHandle nh;
         currentAuctionTasks_pub = nh.advertise<visualization_msgs::Marker>("/visualizer/currentAuction", 1000);
         addedtasks_pub = nh.advertise<visualization_msgs::Marker>("/visualizer/addedTasks", 1000);
-        activeTasks_pub = nh.advertise<visualization_msgs::Marker>("/visualizer/activeTasks", 1000); // tasks that are actively allocated?
+        tasksCurrentlyAllocated_pub = nh.advertise<visualization_msgs::Marker>("/visualizer/activeTasks", 1000); // tasks that are actively allocated?
         finishedTasks_pub = nh.advertise<visualization_msgs::Marker>("/visualizer/finishedTasks", 1000);
         tasksNotFinished_pub = nh.advertise<visualization_msgs::Marker>("/visualizer/tasksNotFinished", 1000);
 
@@ -270,6 +338,7 @@ namespace task_visualization
     }
     void Task_visualizer::taskAllocated(const auction_msgs::task_allocated& msg)
     {
+        //currentlyAllocatedTasks.erase(msg.task.task_ID);
         currentlyAllocatedTasks[msg.task.task_ID] = msg;
     }
     void Task_visualizer::taskFinished(const auction_msgs::task_allocated& msg)
@@ -277,7 +346,7 @@ namespace task_visualization
         allFinishedTasks.push_back(msg.task);
 
 
-        currentlyAllocatedTasks.erase(msg.task.task_ID);
+        
 
 
         for(auto pair : tasksCurrentlyNotFinished)
