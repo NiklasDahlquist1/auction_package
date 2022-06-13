@@ -284,19 +284,23 @@ namespace auction_ns
             std::cout << std::endl;
         }*/
 
-
-        std::vector<double> winners(workers_num);
-        winners = operations_research::taskMatching(costs, rewards); //use the matching optimization
-
-
+        
+        std::vector<std::vector<double>> winners(workers_num);
+        winners = operations_research::taskMatching(costs, rewards, 5); //use the matching optimization
 
 
-        /*for(int i = 0; i < winners.size(); ++i)
+
+
+        for(int i = 0; i < winners.size(); ++i)
         {
-            std::cout << winners[i] << " ";
+            for(int t : winners[i])
+            {
+                std::cout << t << " ";
+            }
+            std::cout <<"; ";
         }
-            std::cout << std::endl;
-*/
+        std::cout << std::endl;
+
 
         std::cout << "Auction round ended, " << bidsCurrentAuction.size() << " bids received" << std::endl;
 
@@ -309,13 +313,78 @@ namespace auction_ns
 
         for(int i = 0; i < winners.size(); ++i)
         {
-            if(winners[i] > -0.5)
+            bool agentHaveAllocatedTask = false;
+            std::vector<auction_msgs::task_allocated> tasks_allocated;
+            std::vector<double> associatedCosts;
+            int index = 0;
+
+            for(double winners_value : winners[i])
+            {
+
+
+                if(winners_value > -0.5)
+                {
+                    auction_msgs::task_allocated task_allocated;
+
+                    task_allocated.task = auctionForAssigning.tasks.tasks[winners[i][index]];
+                    task_allocated.agent_ID = bidsCurrentAuction[i].agent_ID;
+                    task_allocated.agent_name = bidsCurrentAuction[i].agent_name;
+                    task_allocated.time_allocated = ros::Time::now();
+
+                    tasks_allocated.push_back(task_allocated);
+                    associatedCosts.push_back(costs[i][winners[i][index]]);  //bidsCurrentAuction[i].prices[index].price);
+
+
+
+
+                    std::list<auction_ns::Auction_server::task_allocated>::iterator it;
+                    auction_ns::Auction_server::task_allocated t_win;
+                    t_win.task = auctionForAssigning.tasks.tasks[winners[i][index]];
+                    it = std::find(taskQueue.begin(), taskQueue.end(), t_win);
+
+                    index += 1;
+
+
+
+                    (*it).allocated = true;
+                    it->allocatedTo = bidsCurrentAuction[i].agent_name;
+                    agentHaveAllocatedTask = true;
+                }
+            }
+
+            //
+            if(agentHaveAllocatedTask == true)
+            {
+                agentsThatAreAllocated.push_back(bidsCurrentAuction[i].agent_name);
+                
+                
+
+
+                // publish the one with lowest cost or all ?
+                int cheapestTask = 0;
+                int loopTask = 0;
+                double minCost = 1e50;
+                for( const auction_msgs::task_allocated& t : tasks_allocated)
+                {
+                    if(associatedCosts[loopTask] < minCost)
+                    {
+                        cheapestTask = loopTask;
+                        minCost = associatedCosts[loopTask];
+                    }
+                    loopTask += 1;
+                }
+                auctionWinners_pub.publish(tasks_allocated[cheapestTask]);
+            }
+
+
+            /*int ttt = 0; // FIX (if no tasks, handle if array is empty or make sure there is allways a -1 if no tasks?)
+            if(winners[i][ttt] > -0.5)
             {
                 // fix so that allocated winners are saved... TODO
                 // if allocated tasks cannot be reallocated, do we remove them from the queue? probably TODO
                 auction_msgs::task_allocated task_allocated;
 
-                task_allocated.task = auctionForAssigning.tasks.tasks[winners[i]];
+                task_allocated.task = auctionForAssigning.tasks.tasks[winners[i][ttt]];
                 task_allocated.agent_ID = bidsCurrentAuction[i].agent_ID;
                 task_allocated.agent_name = bidsCurrentAuction[i].agent_name;
                 task_allocated.time_allocated = ros::Time::now();
@@ -327,7 +396,7 @@ namespace auction_ns
 
                 std::list<auction_ns::Auction_server::task_allocated>::iterator it;
                 auction_ns::Auction_server::task_allocated t_win;
-                t_win.task = auctionForAssigning.tasks.tasks[winners[i]];
+                t_win.task = auctionForAssigning.tasks.tasks[winners[i][ttt]];
                 it = std::find(taskQueue.begin(), taskQueue.end(), t_win);
 
 
@@ -340,7 +409,7 @@ namespace auction_ns
 
 
                 // TODO: check here if this task has been finished while waitng?
-            }
+            }*/
         }
         
 

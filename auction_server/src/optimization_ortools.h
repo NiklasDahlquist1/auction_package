@@ -17,9 +17,10 @@ namespace operations_research
 
   // task matching, assigns the maximum number of tasks at the minimum cost
   // cost[i][j], i=worker, j=cost associated with task j
-  // returns array result[i] with task associated with each worker i. if -1 that worker has no task assigned
+  // returns array result[i][k] with k tasks associated with each worker i.  empty if no tasks             ////   if -1 that worker has no task assigned
   // rewards[j], reward associated with finishing task j
-  std::vector<double> taskMatching(std::vector<std::vector<double>> costs, const std::vector<double>& rewards)
+  // maxNumOfTasksAssigned: the number of tasks that can be assigned to a single agent
+  std::vector<std::vector<double>> taskMatching(const std::vector<std::vector<double>> costs, const std::vector<double>& rewards, const int maxNumOfTasksAssigned)
   {
     const int num_workers = costs.size();
     const int num_tasks = costs[0].size();
@@ -62,7 +63,7 @@ namespace operations_research
           sum_j += x[i][j];
         }
       }
-      solver->MakeRowConstraint(sum_j <= 1);
+      solver->MakeRowConstraint(sum_j <= maxNumOfTasksAssigned); // change here to assign multiple tasks to an agent
     }
 
     for(int j = 0; j < num_tasks; ++j)
@@ -93,6 +94,14 @@ namespace operations_research
     }    
 
 
+
+    std::vector<std::vector<double>> profitsFromCosts(num_workers);
+    for(int i = 0; i < num_workers; ++i)
+    {
+      profitsFromCosts[i].resize(num_tasks);
+    }
+
+
     //convert costs to "profits" // this will mess up the original cost matrix, but we dont care about that for now
     for(int i = 0; i < num_workers; ++i)
     {
@@ -100,7 +109,11 @@ namespace operations_research
       {
         if(costs[i][j] > 0)
         {
-          costs[i][j] = -costs[i][j] + maxCost + 1;
+          profitsFromCosts[i][j] = -costs[i][j] + maxCost + 1;
+        }
+        else
+        {
+          profitsFromCosts[i][j] = -1;
         }
         //costs[i][j] = 1 / costs[i][j];//costs[i][j] = -costs[i][j];
       }
@@ -114,9 +127,9 @@ namespace operations_research
     {
       for (int j = 0; j < num_tasks; ++j)
       {
-        if(costs[i][j] > 0)
+        if(profitsFromCosts[i][j] > 0)
         {
-          objective->SetCoefficient(x[i][j], costs[i][j] + rewards[j]);
+          objective->SetCoefficient(x[i][j], profitsFromCosts[i][j] + rewards[j]);
         }
       }
     }
@@ -129,12 +142,17 @@ namespace operations_research
 
 
     // return associated task with each worker
-    std::vector<double> result(num_workers);
+    std::vector<std::vector<double>> result(num_workers);
+    //initialize result
+    
     bool assigned = false; // track if current worker (i) has been associated with a task
 
     for (int i = 0; i < num_workers; ++i)
     {
+      //result[i].resize(1);
+
       assigned = false;
+      int taskNumber = 0;
       for (int j = 0; j < num_tasks; ++j)
       {
         if(costs[i][j] > 0)
@@ -143,7 +161,9 @@ namespace operations_research
           if (x[i][j]->solution_value() > 0.5)
           {
             //LOG(INFO) << "Worker " << i << " assigned to task " << j << ".  Cost = " << costs[i][j];
-            result[i] = j;
+            result[i].push_back(j);
+            //result[i][taskNumber] = j;
+            taskNumber += 1;
             assigned = true;
           }
         }
@@ -152,7 +172,7 @@ namespace operations_research
 
       if (assigned == false)
       {
-        result[i] = -1; //indicate that this worker has not been associated with a task
+        //result[i][taskNumber] = -1; //indicate that this worker has not been associated with a task
       }
     }
     //std::cout << "ehj" << std::endl;
