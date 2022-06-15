@@ -318,7 +318,7 @@ namespace auction_ns
             std::vector<double> associatedCosts;
             int index = 0;
 
-            for(double winners_value : winners[i])
+            for(const double winners_value : winners[i])
             {
 
 
