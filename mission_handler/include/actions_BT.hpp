@@ -47,7 +47,7 @@
 
 namespace mission_handler_actions_namespace
 {
-
+    // add the init function to all nodes
     class SyncActionNode_custom : public BT::SyncActionNode
     {
         public:
@@ -71,6 +71,20 @@ namespace mission_handler_actions_namespace
         protected:
             mission_handler_namespace::Mission_handler::mission_handler_state* statePtr;
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // 
@@ -321,6 +335,8 @@ class Set_state_from_CBs : public SyncActionNode_custom
             // clear relevant state data
             statePtr->completed_tasks.clear();
             statePtr->added_tasks.clear();
+            statePtr->results_from_tasks.clear();
+
 
             // set the current data to the accumulated data
             for(auto t : statePtr->completed_tasks_accumulated_tmp)
@@ -331,10 +347,15 @@ class Set_state_from_CBs : public SyncActionNode_custom
             {
                 statePtr->added_tasks.push_back(t);
             }
+            for(auto t : statePtr->results_from_tasks_accumulated_tmp)
+            {
+                statePtr->results_from_tasks.push_back(t);
+            }
+
 
             statePtr->completed_tasks_accumulated_tmp.clear();
             statePtr->added_tasks_accumulated_tmp.clear();
-
+            statePtr->results_from_tasks_accumulated_tmp.clear();
 
 
             return BT::NodeStatus::SUCCESS;

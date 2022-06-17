@@ -18,7 +18,8 @@ Mission_handler::Mission_handler()
     ros::NodeHandle nh_private("~");
 
     task_added_sub = nh.subscribe("/addTasks", 1000, &Mission_handler::task_added_CB, this);
-    task_finished_sub =nh.subscribe("/confirmTaskFinished", 1000, &Mission_handler::task_finished_CB, this);
+    task_finished_sub = nh.subscribe("/confirmTaskFinished", 1000, &Mission_handler::task_finished_CB, this);
+    task_result_sub = nh.subscribe("/task_result_TODO", 1000, &Mission_handler::task_result_CB, this);
 }
 Mission_handler::~Mission_handler()
 {
@@ -44,7 +45,7 @@ void Mission_handler::spin_loop(double loop_rate)
         execute_tree(this->tree);
 
 
-        
+        /*
         if(this->state_handler.added_tasks.size() > 0)
         {
             std::cout << "Added tasks:  ";
@@ -63,7 +64,7 @@ void Mission_handler::spin_loop(double loop_rate)
             }
             std::cout << std::endl;
         }
-        
+        */
 
         
 
@@ -94,7 +95,6 @@ void Mission_handler::initialize_mission_handler()
             <root main_tree_to_execute = "MainTree" >
                 <BehaviorTree ID="MainTree">
                     <ReactiveSequence>
-
                         <Action ID="Set_state_from_CBs"/>
                         
                         <ReactiveFallback>
@@ -102,10 +102,9 @@ void Mission_handler::initialize_mission_handler()
                             <Action ID="Add_new_missions"/>
                         </ReactiveFallback>
 
-
                         <ReactiveFallback>
                             <Action ID="Missions_are_active"/>
-                        
+
                             <ReactiveSequence>
                                 <Action ID="Init_new_nodes"/>
                                 <Action ID="Add_new_nodes_to_active_list"/>
@@ -184,7 +183,6 @@ void Mission_handler::initFactory(BT::BehaviorTreeFactory& factory)
     factory.registerNodeType<mission_handler_actions_namespace::Init_new_nodes>("Init_new_nodes");
     factory.registerNodeType<mission_handler_actions_namespace::Add_new_nodes_to_active_list>("Add_new_nodes_to_active_list");
     factory.registerNodeType<mission_handler_actions_namespace::Execute_node_logic>("Execute_node_logic");
-
     factory.registerNodeType<mission_handler_actions_namespace::Add_child_to_new_logic>("Add_child_to_new_logic");
     factory.registerNodeType<mission_handler_actions_namespace::Move_completed_nodes_to_finished_list>("Move_completed_nodes_to_finished_list");
 
@@ -206,14 +204,65 @@ void Mission_handler::task_added_CB(const auction_msgs::taskArray& msg)
         this->state_handler.added_tasks_accumulated_tmp.push_back(task);
     }
 }
-//void taskAllocated(const auction_msgs::task_allocated& msg);
+
 void Mission_handler::task_finished_CB(const auction_msgs::task_allocated& msg)
 {
     this->state_handler.completed_tasks_accumulated_tmp.push_back(msg.task);
 }
 
+void Mission_handler::task_result_CB(const auction_msgs::task_result& msg)
+{
+    this->state_handler.results_from_tasks_accumulated_tmp.push_back(msg);
+}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////// mission class
+
+Mission::Mission()
+{
+
+}
+Mission::~Mission()
+{
+
+}
+
+void Mission::add_start_node(std::shared_ptr<Node_base> start_node)
+{
+    this->start_nodes.push_back(start_node);
+}
+
+
+void Mission::print_nodes()
+{
+    int node_number = 0;
+    for(auto start_n : this->start_nodes)
+    {
+        std::cout << "Mission start node number " << node_number++ << ": \n";
+        std::stringstream stream;
+        start_n.get()->print_mission_recursive(stream);
+        std::cout << stream.str();
+    }
+}
 
 
 

@@ -23,6 +23,9 @@ namespace mission_handler_namespace
 {
 
 
+
+
+
 class Node_base 
 {
     public:
@@ -30,46 +33,80 @@ class Node_base
     ~Node_base();
 
 
-    virtual void node_logic();
-    virtual void node_start_logic();
-    virtual bool ready_to_start_logic();
+    enum node_status 
+    {
+        COMPLETED,
+        RUNNING,
+        FAILED
+    };
+
+    virtual void node_logic() = 0;
+    virtual void node_start_logic() = 0;
+    virtual bool ready_to_start_logic() = 0;
 
 
-    void add_children(const Node_base* children); // 
+    void add_child(std::shared_ptr<Node_base> child); // 
+    void add_parent(Node_base* parent); // 
+    
 
-    //void print_mission_recursive(); // not important, but would look nice (how to fix?)
+    void print_mission_recursive(std::stringstream& fileStream, int depth=0); // not important, but would look nice (how to fix?)
+    std::string get_name();
+    std::vector<std::shared_ptr<Node_base>> find_leaf_nodes();
+
 
     protected:
     std::vector<Node_base*> parents;
-    std::vector<Node_base*> children;
+    std::vector<std::shared_ptr<Node_base>> children;
     std::string node_name;
     // sadfsafd status
 
 
     private:
+
+        void indent(std::stringstream& fileStream, int depth);
 };
 
 
 
-class Node_sync : Node_base
+class Node_sync : public Node_base
 {
     public:
+    using Node_base::Node_base;
+
+    void node_logic();
+    void node_start_logic();
+    bool ready_to_start_logic();
 
     private:
 
 };
 
 
-class Node_tasks : Node_base
+class Node_tasks : public Node_base
 {
     public:
+    using Node_base::Node_base;
+
+    void node_logic();
+    void node_start_logic();
+    bool ready_to_start_logic();
+
+
+    void add_required_task(const auction_msgs::task& task);
+
 
     private:
 
+    std::vector<auction_msgs::task> tasks_required_by_node;
 
     std::list<auction_msgs::task> tasks_not_finished;
+    //std::vector<auction_msgs::task> tasks_to_be_added_but_not_required;
     //std::list<auction_msgs::task> tasks_finished;
 };
+
+
+
+
 
 
 
