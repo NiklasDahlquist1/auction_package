@@ -12,7 +12,7 @@ namespace mission_handler_namespace
 
 Mission_handler::Mission_handler()
 {
-    std::cout << "AAAAAAAAAAAAAAAAAAa" <<std::endl;
+    //std::cout << "AAAAAAAAAAAAAAAAAAa" <<std::endl;
     ros::NodeHandle nh;
 
     ros::NodeHandle nh_private("~");
@@ -20,7 +20,13 @@ Mission_handler::Mission_handler()
     task_added_sub = nh.subscribe("/addTasks", 1000, &Mission_handler::task_added_CB, this);
     task_finished_sub = nh.subscribe("/confirmTaskFinished", 1000, &Mission_handler::task_finished_CB, this);
     task_result_sub = nh.subscribe("/task_result_TODO", 1000, &Mission_handler::task_result_CB, this);
+
+
+    this->state_handler.add_task_pub = nh.advertise<auction_msgs::taskArray>("/addTasks", 1000);
 }
+
+
+
 Mission_handler::~Mission_handler()
 {
     
@@ -106,11 +112,11 @@ void Mission_handler::initialize_mission_handler()
                             <Action ID="Missions_are_active"/>
 
                             <ReactiveSequence>
-                                <Action ID="Init_new_nodes"/>
-                                <Action ID="Add_new_nodes_to_active_list"/>
+                                <!--<Action ID="Init_new_nodes"/>
+                                <Action ID="Add_new_nodes_to_active_list"/>-->
                                 <Action ID="Execute_node_logic"/>
                                 <Action ID="Add_child_to_new_logic"/>
-                                <Action ID="Move_completed_nodes_to_finished_list"/>
+                                <Action ID="Remove_completed_nodes"/>
                             </ReactiveSequence>
                         </ReactiveFallback>
 
@@ -121,6 +127,7 @@ void Mission_handler::initialize_mission_handler()
 
     this->tree = this->factory.createTreeFromText(xml_text);
 
+    BT::printTreeRecursively(this->tree.rootNode());
 
     initNodes(this->tree);
 }
@@ -169,6 +176,10 @@ void Mission_handler::initNodes(BT::Tree& tree)
         if(auto move_completed_nodes_to_finished_list = dynamic_cast<mission_handler_actions_namespace::Move_completed_nodes_to_finished_list*>( node.get()))
         {
             move_completed_nodes_to_finished_list->init(&this->state_handler);
+        }        
+        if(auto remove_completed_nodes = dynamic_cast<mission_handler_actions_namespace::Remove_completed_nodes*>( node.get()))
+        {
+            remove_completed_nodes->init(&this->state_handler);
         }
     }
 }
@@ -184,6 +195,7 @@ void Mission_handler::initFactory(BT::BehaviorTreeFactory& factory)
     factory.registerNodeType<mission_handler_actions_namespace::Add_new_nodes_to_active_list>("Add_new_nodes_to_active_list");
     factory.registerNodeType<mission_handler_actions_namespace::Execute_node_logic>("Execute_node_logic");
     factory.registerNodeType<mission_handler_actions_namespace::Add_child_to_new_logic>("Add_child_to_new_logic");
+    factory.registerNodeType<mission_handler_actions_namespace::Remove_completed_nodes>("Remove_completed_nodes");
     factory.registerNodeType<mission_handler_actions_namespace::Move_completed_nodes_to_finished_list>("Move_completed_nodes_to_finished_list");
 
 
@@ -192,6 +204,15 @@ void Mission_handler::initFactory(BT::BehaviorTreeFactory& factory)
 
     return;
 }
+
+
+void Mission_handler::addNewMission(Mission mission)
+{
+    this->state_handler.new_missions.push_back(mission);
+}
+
+
+
 
 
 
@@ -233,36 +254,6 @@ void Mission_handler::task_result_CB(const auction_msgs::task_result& msg)
 
 
 
-
-
-///////////////////////// mission class
-
-Mission::Mission()
-{
-
-}
-Mission::~Mission()
-{
-
-}
-
-void Mission::add_start_node(std::shared_ptr<Node_base> start_node)
-{
-    this->start_nodes.push_back(start_node);
-}
-
-
-void Mission::print_nodes()
-{
-    int node_number = 0;
-    for(auto start_n : this->start_nodes)
-    {
-        std::cout << "Mission start node number " << node_number++ << ": \n";
-        std::stringstream stream;
-        start_n.get()->print_mission_recursive(stream);
-        std::cout << stream.str();
-    }
-}
 
 
 

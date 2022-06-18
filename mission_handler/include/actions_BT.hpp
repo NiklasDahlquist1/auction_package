@@ -1,7 +1,7 @@
 
 
-#ifndef AAAAAAAA
-#define AAAAAAAAAAAAA
+#ifndef ACTIONS_BT_HPP
+#define ACTIONS_BT_HPP
 
 #include "behaviortree_cpp_v3/bt_factory.h"
 #include "behaviortree_cpp_v3/loggers/bt_cout_logger.h"
@@ -27,6 +27,10 @@
 
 #include "nodes_mission.hpp"
 #include "behaviortree_cpp_v3/action_node.h"
+
+
+
+#include "definitions.hpp"
 
 
 
@@ -57,7 +61,7 @@ namespace mission_handler_actions_namespace
             }
             ~SyncActionNode_custom() override = default;
 
-            void init(mission_handler_namespace::Mission_handler::mission_handler_state* statePtr)
+            void init(mission_handler_namespace::mission_handler_state* statePtr)
             //(mission_handler_namespace::Mission_handler::mission_handler_state* statePtr)
             {
                 if(statePtr == nullptr)
@@ -69,7 +73,7 @@ namespace mission_handler_actions_namespace
 
 
         protected:
-            mission_handler_namespace::Mission_handler::mission_handler_state* statePtr;
+            mission_handler_namespace::mission_handler_state* statePtr;
     };
 
 
@@ -105,8 +109,14 @@ namespace mission_handler_actions_namespace
 
             BT::NodeStatus tick() override
             {
-                return BT::NodeStatus::SUCCESS;
-                //
+                if(this->statePtr->new_missions.size() > 0)
+                {
+                    return BT::NodeStatus::FAILURE;
+                }
+                else
+                {
+                    return BT::NodeStatus::SUCCESS;
+                }
             }
     };
 
@@ -128,8 +138,18 @@ namespace mission_handler_actions_namespace
 
             BT::NodeStatus tick() override
             {
+                for(auto& mission : this->statePtr->new_missions)
+                {
+                    for(const auto& node : mission.start_nodes)
+                    {
+                        mission.active_nodes.push_back(node);
+                        node.get()->node_start_logic(*this->statePtr);
+                    }
+                    this->statePtr->active_missions.push_back(mission);
+                }
+                this->statePtr->new_missions.clear();
+
                 return BT::NodeStatus::SUCCESS;
-                //
             }
     };
 
@@ -154,11 +174,12 @@ namespace mission_handler_actions_namespace
             {
                 if(this->statePtr->active_missions.size() > 0)
                 {
-                    return BT::NodeStatus::SUCCESS;
+                    std::cout << "Currently " << this->statePtr->active_missions.size() << " active missions" << std::endl;
+                    return BT::NodeStatus::FAILURE;
                 }
                 else
                 {
-                    return BT::NodeStatus::FAILURE;
+                    return BT::NodeStatus::SUCCESS;
                 }
             }
     };
@@ -184,7 +205,6 @@ namespace mission_handler_actions_namespace
             BT::NodeStatus tick() override
             {
                 return BT::NodeStatus::SUCCESS;
-                //
             }
     };
 
@@ -233,35 +253,63 @@ class Execute_node_logic : public SyncActionNode_custom
 
             BT::NodeStatus tick() override
             {
+                for(const auto& mission : this->statePtr->active_missions)
+                {
+                    for(const auto& node : mission.active_nodes)
+                    {
+                        if(node.get()->get_current_status() == mission_handler_namespace::Node_base::RUNNING)
+                        {
+                            std::cout << "Node logic: " << node.get()->get_name() << std::endl;
+                            node.get()->node_logic(*statePtr);
+                        }
+                    }
+                }
                 return BT::NodeStatus::SUCCESS;
-                //
             }
     };
 
 
 // 
 class Add_child_to_new_logic : public SyncActionNode_custom
-    {
-        private: 
+{
+    private: 
 
-        public:
+    public:
 
 
-            Add_child_to_new_logic(const std::string& name, const BT::NodeConfiguration& config) : SyncActionNode_custom(name, config)
+        Add_child_to_new_logic(const std::string& name, const BT::NodeConfiguration& config) : SyncActionNode_custom(name, config)
+        {
+        }
+
+        static BT::PortsList providedPorts()
+        {
+            return{ };
+        }
+
+        BT::NodeStatus tick() override
+        {
+            for(auto& mission : this->statePtr->active_missions)
             {
+                for(const auto& node : mission.active_nodes)
+                {
+                    // check all children to active nodes, (how to handle duplicate children???)
+                    for(auto& child : node.get()->get_all_children())
+                    {
+                        if(child.get()->ready_to_start_logic(*this->statePtr) == true &&
+                            child.get()->get_current_status() == mission_handler_namespace::Node_base::NOT_STARTED)
+                        {
+                            std::cout << "Node started: " << child.get()->get_name() << std::endl;
+                            child.get()->node_start_logic(*this->statePtr);
+                            mission.active_nodes.push_back(child);
+                        }
+                    }
+                }
             }
 
-            static BT::PortsList providedPorts()
-            {
-                return{ };
-            }
-
-            BT::NodeStatus tick() override
-            {
-                return BT::NodeStatus::SUCCESS;
-                //
-            }
-    };
+            return BT::NodeStatus::SUCCESS;
+            //
+        }
+};
 
 
 
@@ -285,19 +333,18 @@ class Move_completed_nodes_to_finished_list : public SyncActionNode_custom
         BT::NodeStatus tick() override
         {
             return BT::NodeStatus::SUCCESS;
-            //
         }
 };
 
 
 // 
-class Remove_completed_missions : public SyncActionNode_custom
+class Remove_completed_nodes : public SyncActionNode_custom
 {
     private: 
 
     public:
 
-        Remove_completed_missions(const std::string& name, const BT::NodeConfiguration& config) : SyncActionNode_custom(name, config)
+        Remove_completed_nodes(const std::string& name, const BT::NodeConfiguration& config) : SyncActionNode_custom(name, config)
         {
         }
 
@@ -308,6 +355,32 @@ class Remove_completed_missions : public SyncActionNode_custom
 
         BT::NodeStatus tick() override
         {
+            for(auto& mission : this->statePtr->active_missions)
+            {
+                std::list<std::shared_ptr<mission_handler_namespace::Node_base>> active_nodes = mission.active_nodes;
+                for(const auto& node : active_nodes)
+                {
+
+                    if(node.get()->get_current_status() == mission_handler_namespace::Node_base::COMPLETED)
+                    {
+                        bool remove = true;
+                        // remove node when all children are completed
+                        for(const auto& child : node.get()->get_all_children())
+                        {
+                            if(child.get()->get_current_status() != mission_handler_namespace::Node_base::COMPLETED)
+                            {
+                                remove = false;
+                                break;
+                            }
+                        }
+                        if(remove == true)
+                        {
+                            std::cout << "Node completed: " << node.get()->get_name() << std::endl;
+                            mission.active_nodes.remove(node);
+                        }
+                    }
+                } 
+            }
             return BT::NodeStatus::SUCCESS;
             //
         }

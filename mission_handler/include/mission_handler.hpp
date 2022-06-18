@@ -6,6 +6,7 @@
 
 
 #include "nodes_mission.hpp"
+//#include "definitions.hpp"
 
 
 #include "auction_msgs/auction.h"
@@ -34,43 +35,6 @@ namespace mission_handler_namespace
 
 
 
-class Mission
-{
-    public:
-    Mission();
-    ~Mission();
-
-    enum mission_status 
-    {
-        COMPLETED,
-        IN_PROGRESS,
-        FAILED
-    };
-
-
-
-
-    std::vector<std::shared_ptr<Node_base>> start_nodes;
-    std::string mission_name;
-
-    void add_start_node(std::shared_ptr<Node_base> start_node); 
-    void print_nodes();
-
-    mission_status check_mission_status();
-    
-    
-    
-    
-
-
-  
-
-    private:
-    std::vector<std::shared_ptr<Node_base>> mission_goal_nodes;
-    // mission_status variable
-
-};
-
 
 
 
@@ -90,24 +54,13 @@ class Mission_handler
         void execute_tree(const BT::Tree& tree);
         void spin_loop(double loop_rate);
 
-  //      void add_mission(Node_base* start_node); //TODO
+        //void add_mission(Node_base* start_node); //TODO
 
 
-        struct mission_handler_state
-        {
-            std::vector<int> new_missions;
-            std::list<int> active_missions;
-            std::vector<int> completed_missions;
 
-            std::vector<auction_msgs::task> completed_tasks;
-            std::vector<auction_msgs::task> added_tasks;
-            std::vector<auction_msgs::task_result> results_from_tasks;
 
-            std::vector<auction_msgs::task> completed_tasks_accumulated_tmp;
-            std::vector<auction_msgs::task> added_tasks_accumulated_tmp;
-            std::vector<auction_msgs::task_result> results_from_tasks_accumulated_tmp;
-        };
 
+        void addNewMission(Mission mission);
 
 
     private:
@@ -115,9 +68,6 @@ class Mission_handler
 
         mission_handler_state state_handler;
 
-
-        //std::list<double> active_missions;
-        //std::list<double> finished_missions; ?
 
 
 
@@ -137,7 +87,8 @@ class Mission_handler
         //ros::Subscriber taskAllocated_sub;
         ros::Subscriber task_finished_sub;
         ros::Subscriber task_result_sub;
-        //ros::Subscriber new_mission_sub;
+        //ros::Subscriber new_mission_sub; // maybe create ros interface for adding (or removing, etc) mission at runtime
+
 
         // callbacks
 
