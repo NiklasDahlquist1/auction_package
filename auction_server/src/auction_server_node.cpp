@@ -11,20 +11,25 @@ int main(int argc, char** argv)
 
     double auctionRoundTime;
     double serverUpdateRate;
+    int maxNumberOfBids;
+    int tasksAllocatedPerAgent;
     if (!nh_private.getParam ("auctionRoundTime", auctionRoundTime))
         auctionRoundTime = 1;
     if (!nh_private.getParam ("serverUpdateRate", serverUpdateRate))
-        serverUpdateRate = 200;
+        serverUpdateRate = 100;
+    if (!nh_private.getParam ("tasksAllocatedPerAgent", tasksAllocatedPerAgent))
+        tasksAllocatedPerAgent = 2;
+    if (!nh_private.getParam ("maxNumberOfBids", maxNumberOfBids))
+        maxNumberOfBids = 2;
+ 
 
-
-        
-
-    std::cout << "Using auctionRoundTime = " << auctionRoundTime << " and serverUpdateRate = " << serverUpdateRate << std::endl;
+    std::cout << "Server parameters: \n" << "\tauctionRoundTime: " << auctionRoundTime << "\n\tserverUpdateRate: " << serverUpdateRate 
+              << "\n\ttasksAllocatedPerAgent: " << tasksAllocatedPerAgent << "\n\tmaxNumberOfBids: " << maxNumberOfBids << std::endl;
 
 
 
     auction_ns::Auction_server auction_server = auction_ns::Auction_server();
-    auction_server.initServerParameters(auctionRoundTime);
+    auction_server.initServerParameters(auctionRoundTime, tasksAllocatedPerAgent, maxNumberOfBids);
     
 
     auction_server.spin_loop(serverUpdateRate);

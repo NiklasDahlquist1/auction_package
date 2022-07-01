@@ -26,9 +26,11 @@ namespace auction_ns
     {
     }
 
-    void Auction_server::initServerParameters(double auctionRoundTime)
+    void Auction_server::initServerParameters(double auctionRoundTime, int tasksAllocatedPerAgent, int maxNumberOfBids)
     {
         this->auctionRoundTime = auctionRoundTime;
+        this->tasksAllocatedPerAgent = tasksAllocatedPerAgent;
+        this->maxNumberOfBids = maxNumberOfBids;
     }
 
     void Auction_server::createAndPublishNewAuction()
@@ -59,7 +61,7 @@ namespace auction_ns
         if(auctionRunning)
         {
             double currentTime = ros::Time::now().toSec();
-            if(activeAuction.header.stamp.toSec() + auctionRoundTime <= currentTime || bidsCurrentAuction.size() >= 3) //TODO
+            if(activeAuction.header.stamp.toSec() + auctionRoundTime <= currentTime || bidsCurrentAuction.size() >= this->maxNumberOfBids) //TODO
             {
                 declareWinner();
                 auctionRunning = false;
@@ -286,7 +288,7 @@ namespace auction_ns
 
         
         std::vector<std::vector<double>> winners(workers_num);
-        winners = operations_research::taskMatching(costs, rewards, 5); //use the matching optimization
+        winners = operations_research::taskMatching(costs, rewards, this->tasksAllocatedPerAgent); //use the matching optimization
 
 
 

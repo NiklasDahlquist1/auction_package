@@ -71,6 +71,8 @@ namespace auction_ns
         //parameters?
 
         double auctionRoundTime;
+        int tasksAllocatedPerAgent;
+        int maxNumberOfBids;
 
 
 
@@ -104,7 +106,7 @@ namespace auction_ns
         Auction_server();
         ~Auction_server();
 
-        void initServerParameters(double auctionRoundTime);
+        void initServerParameters(double auctionRoundTime, int tasksAllocatedPerAgent, int maxNumberOfBids);
 
         void updateLogic();
         void spin_loop(double loop_rate);
