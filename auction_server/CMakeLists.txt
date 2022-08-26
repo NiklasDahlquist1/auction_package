@@ -259,6 +259,17 @@ target_link_libraries(task_adder_grid ${catkin_LIBRARIES})
 
 
 
+add_executable(optimization_tester
+    src/optimization_tester.cpp
+)
+add_dependencies(optimization_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(optimization_tester ${catkin_LIBRARIES} ortools)
+
+
+
+
+
+
 
 
 

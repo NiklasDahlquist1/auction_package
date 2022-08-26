@@ -8,6 +8,10 @@
 #include "ortools/linear_solver/linear_solver.h"
 
 
+#include "optimization_tester.hpp"
+#include "optimization_ortools.h"
+
+
 
 
 namespace operations_research
@@ -20,7 +24,7 @@ namespace operations_research
   // returns array result[i][k] with k tasks associated with each worker i.  empty if no tasks             ////   if -1 that worker has no task assigned
   // rewards[j], reward associated with finishing task j
   // maxNumOfTasksAssigned: the number of tasks that can be assigned to a single agent
-  std::vector<std::vector<double>> taskMatching(const std::vector<std::vector<double>> costs, const std::vector<double>& rewards, const int maxNumOfTasksAssigned)
+  std::vector<std::vector<double>> taskMatching(const std::vector<std::vector<double>> costs, const std::vector<double>& rewards, const int maxNumOfTasksAssigned, const std::string solver_name)
   {
     const int num_workers = costs.size();
     const int num_tasks = costs[0].size();
@@ -29,7 +33,7 @@ namespace operations_research
 
 
     // Create solver with
-    std::unique_ptr<MPSolver> solver(MPSolver::CreateSolver("SCIP"));
+    std::unique_ptr<MPSolver> solver(MPSolver::CreateSolver(solver_name)); // SCIP CP-SAT, GPLK, GLOP, (GUROBI), CLP, CBC
     if (!solver)
     {
       std::cout << "ERROR: could not create solver" << std::endl; //works for now
@@ -46,7 +50,7 @@ namespace operations_research
       {
         if(costs[i][j] > 0)
         {
-          x[i][j] = solver->MakeIntVar(0, 1, "");
+          x[i][j] = solver->MakeBoolVar(""); //->MakeIntVar(0, 1, "");
         }
       }
     }
@@ -136,9 +140,16 @@ namespace operations_research
     objective->SetMaximization();
 
 
+    
+
+    auto start = std::chrono::high_resolution_clock::now();
+
     // Solve
     const MPSolver::ResultStatus result_status = solver->Solve();
 
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = end-start;
+    //std::cout << "Pure solving time: " << elapsed.count() << " ms, result status: " << result_status << ", objective value: " << objective->Value() << "\n";
 
 
     // return associated task with each worker

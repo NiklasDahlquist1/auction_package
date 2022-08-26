@@ -288,7 +288,7 @@ namespace auction_ns
 
         
         std::vector<std::vector<double>> winners(workers_num);
-        winners = operations_research::taskMatching(costs, rewards, this->tasksAllocatedPerAgent); //use the matching optimization
+        winners = operations_research::taskMatching(costs, rewards, this->tasksAllocatedPerAgent, "SCIP"); //use the matching optimization
 
 
 
