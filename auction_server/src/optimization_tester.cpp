@@ -121,6 +121,7 @@ double Optimization_tester::time_optimization(int number_of_agents, int number_o
 
 
 
+
     start = std::chrono::high_resolution_clock::now();
     operations_research::taskMatching(costs, rewards, max_number_of_tasks_assigned, "SCIP"); //use the matching optimization
     end = std::chrono::high_resolution_clock::now();

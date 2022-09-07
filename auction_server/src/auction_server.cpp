@@ -365,7 +365,7 @@ namespace auction_ns
                 // publish the one with lowest cost or all ?
                 int cheapestTask = 0;
                 int loopTask = 0;
-                double minCost = 1e50;
+                double minCost = 1e99;
                 for( const auction_msgs::task_allocated& t : tasks_allocated)
                 {
                     if(associatedCosts[loopTask] < minCost)

@@ -106,6 +106,17 @@ namespace task_visualization
                 point.z = std::stod(parts[2]);
                 task_pos.push_back(point);
             }
+            else if(t.task_name == "pickPlace")
+            {
+                geometry_msgs::Point point;
+                auto parts = splitString(t.task_data, ';');
+                point.x = std::stod(parts[2]);
+                point.y = std::stod(parts[3]);
+                point.z = 0;
+                task_pos.push_back(point);
+
+            }
+
 
         }
         //allAdded.lifetime
@@ -144,8 +155,11 @@ namespace task_visualization
 
         // all not finished
         visualization_msgs::Marker allAdded;
-
         
+        visualization_msgs::Marker marker_blue;
+
+
+        std::vector<geometry_msgs::Point> task_blue;
         std::vector<geometry_msgs::Point> task_pos;
 
         for(auto pair : tasksCurrentlyNotFinished)
@@ -158,6 +172,23 @@ namespace task_visualization
                 point.y = std::stod(parts[1]);
                 point.z = std::stod(parts[2]);
                 task_pos.push_back(point);
+            }
+            else if(pair.second.task_name == "pickPlace")
+            {
+                auto parts = splitString(pair.second.task_data, ';');
+
+                geometry_msgs::Point pick_point;
+                pick_point.x = std::stod(parts[0]);
+                pick_point.y = std::stod(parts[1]);
+                pick_point.z = 0;
+                task_pos.push_back(pick_point);
+
+                geometry_msgs::Point place_point;
+                place_point.x = std::stod(parts[2]);
+                place_point.y = std::stod(parts[3]);
+                place_point.z = 0;
+                task_blue.push_back(place_point);
+
             }
 
         }
@@ -184,6 +215,32 @@ namespace task_visualization
         allAdded.color.b = 0.0;
         allAdded.points = task_pos;
         tasksNotFinished_pub.publish(allAdded);
+
+
+
+        marker_blue.header.frame_id = "world";
+        marker_blue.header.stamp = ros::Time::now();
+        marker_blue.ns = "auction_visualizer";
+        marker_blue.id = 2;
+        marker_blue.type = visualization_msgs::Marker::CUBE_LIST;
+        marker_blue.action = visualization_msgs::Marker::ADD;
+        marker_blue.pose.position.x = 0;
+        marker_blue.pose.position.y = 0;
+        marker_blue.pose.position.z = 0;
+        marker_blue.pose.orientation.x = 0.0;
+        marker_blue.pose.orientation.y = 0.0;
+        marker_blue.pose.orientation.z = 0.0;
+        marker_blue.pose.orientation.w = 1.0;
+        marker_blue.scale.x = 0.75*0.3;
+        marker_blue.scale.y = 0.75*0.3;
+        marker_blue.scale.z = 0.4*0.3;
+        marker_blue.color.a = 0.95;
+        marker_blue.color.r = 0.0;
+        marker_blue.color.g = 0.0;
+        marker_blue.color.b = 1.0;
+        marker_blue.points = task_blue;
+        tasksNotFinished_pub.publish(marker_blue);
+
     }
 
 
