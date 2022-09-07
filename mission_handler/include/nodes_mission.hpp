@@ -14,6 +14,12 @@
 #include "auction_msgs/task_finished.h"
 #include "auction_msgs/task_result.h"
 
+
+#include "geometry_msgs/Point.h"
+
+
+#include <random>
+
 //#include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
 
@@ -50,7 +56,7 @@ struct mission_handler_state
 class Node_base 
 {
     public:
-    Node_base(std::string name);
+    Node_base(const std::string& name);
     ~Node_base();
 
 
@@ -110,6 +116,58 @@ class Node_sync : public Node_base
 };
 
 
+class Node_pick_place : public Node_base
+{
+    public:
+    using Node_base::Node_base;
+    Node_pick_place(const std::string& name) : Node_base::Node_base(name), rng(dev()) { }
+
+    void node_logic(const mission_handler_state& state);
+    void node_start_logic(const mission_handler_state& state);
+    bool ready_to_start_logic(const mission_handler_state& state);
+
+    node_status get_current_status();
+
+
+    struct pick_area
+    {
+        geometry_msgs::Point position;
+        double width;
+        double height;
+    };
+    
+
+    void set_pick_area(const pick_area& area);
+    void set_place_positions(const std::vector<geometry_msgs::Point>& place_points);
+
+
+
+
+    private:
+
+    pick_area pick_area_task;
+    std::vector<geometry_msgs::Point> place_points;
+
+    double spawn_interval = 0.1;
+    double spawn_rate = 0.5;
+    double time_last_check = ros::Time::now().toSec();
+    double time_accumulator = 0;
+    double task_reward = 0;
+
+
+
+    std::random_device dev;
+    std::mt19937 rng;
+
+
+
+
+};
+
+
+// node for spawning pick and place tasks, a "station" where a ground agents comes to pick up items
+
+
 class Node_tasks : public Node_base
 {
     public:
@@ -133,9 +191,6 @@ class Node_tasks : public Node_base
     //std::vector<auction_msgs::task> tasks_to_be_added_but_not_required;
     //std::list<auction_msgs::task> tasks_finished;
 };
-
-
-
 
 
 

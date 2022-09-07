@@ -13,7 +13,7 @@ namespace mission_handler_namespace
 
 
 
-Node_base::Node_base(std::string name)
+Node_base::Node_base(const std::string& name)
 {
     this->node_name = name;
 }
@@ -239,6 +239,126 @@ void Node_tasks::add_required_task(auction_msgs::task& task)
     task.creator_name = "Mission, node: " + this->node_name;
     this->tasks_required_by_node.push_back(task);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////// Node_pick_place
+
+
+
+
+void Node_pick_place::node_logic(const mission_handler_state& state)
+{
+    // increase time, check if we should add a task, create a task (with random pick/place position)
+    double dt = ros::Time::now().toSec() - this->time_last_check;
+    time_accumulator += dt;
+    this->time_last_check = ros::Time::now().toSec();
+
+
+
+    while(this->time_accumulator > this->spawn_interval)
+    //if(ros::Time::now().toSec() - this->time_last_check > spawn_interval) // very approximate, time error will accumulate over time. but who cares
+    {
+        std::uniform_real_distribution<> dist_01(0.0, 1.0); // distribution
+        if(dist_01(this->rng) < this->spawn_rate)
+        {   
+            geometry_msgs::Point pick_point;
+            geometry_msgs::Point place_point;
+
+            pick_point.x = this->pick_area_task.position.x + this->pick_area_task.width * dist_01(this->rng);
+            pick_point.y = this->pick_area_task.position.y + this->pick_area_task.height * dist_01(this->rng);
+
+
+            std::uniform_int_distribution<> dist_place(0, this->place_points.size() - 1);
+            int place_point_index = dist_place(this->rng);
+            place_point.x = this->place_points[place_point_index].x;
+            place_point.y = this->place_points[place_point_index].y;
+
+
+
+            std::uniform_int_distribution<> dist_id(0, INT32_MAX);
+
+
+            auction_msgs::task task;
+            task.task_data = std::to_string(pick_point.x) + ";" + std::to_string(pick_point.y) + ";" +
+                             std::to_string(place_point.x) + ";" + std::to_string(place_point.y);
+            task.created_time = ros::Time::now();
+            task.creator_name = this->node_name;
+            task.task_ID = dist_id(this->rng);
+            task.reward = this->task_reward;
+            task.task_name = "pickPlace";
+
+            auction_msgs::taskArray tasks;
+            tasks.tasks.push_back(task);
+            state.add_task_pub.publish(tasks);
+        }
+
+        
+        this->time_accumulator -= this->spawn_interval;
+    }
+
+}
+
+
+void Node_pick_place::node_start_logic(const mission_handler_state& state)
+{
+    // we do nothing here?
+
+    // set current node state
+    this->current_status = RUNNING;
+}
+
+
+bool Node_pick_place::ready_to_start_logic(const mission_handler_state& state)
+{
+    // if all parents are OK, this is ready to start.
+    // if number of parents = 0, also ready to start
+
+    bool ready = true;
+    for(const auto& parent : this->parents)
+    {
+        if(parent->get_current_status() != Node_base::node_status::COMPLETED)
+        {
+            ready = false;
+        }
+    }
+    return ready;
+}
+
+
+Node_base::node_status Node_pick_place::get_current_status()
+{
+    return this->current_status;
+}
+
+
+
+void Node_pick_place::set_pick_area(const Node_pick_place::pick_area& area)
+{
+    this->pick_area_task = area;
+}
+void Node_pick_place::set_place_positions(const std::vector<geometry_msgs::Point>& place_points)
+{
+    this->place_points = place_points;
+}
+
+
+
+
+
+
 
 
 

@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     r.sleep();
     ros::spinOnce(); // delay to allow callbacks to update state, etc.
 
-    mission_handler.spin_loop(10.0);
+    mission_handler.spin_loop(100.0);
     
 
     return 0;
@@ -39,6 +39,80 @@ int main(int argc, char** argv)
 
 void create_mission(mission_handler_namespace::Mission& mission, const std::string& root_name)
 {
+    mission_handler_namespace::Node_pick_place::pick_area pick_area;
+    std::vector<geometry_msgs::Point> place_points;
+    pick_area.position.x = 3;
+    pick_area.position.y = -6;
+    pick_area.height = 2;
+    pick_area.width = 2;
+    geometry_msgs::Point point;
+    point.x = 0;
+    point.y = 1;
+    place_points.push_back(point);
+    point.x = 0;
+    point.y = 2;
+    place_points.push_back(point);
+    point.x = 0;
+    point.y = 3;
+    place_points.push_back(point);
+    point.x = 1;
+    point.y = 3;
+    place_points.push_back(point);
+    point.x = 2;
+    point.y = 3;
+    place_points.push_back(point);
+    point.x = 1;
+    point.y = 1;
+    place_points.push_back(point);
+
+    mission_handler_namespace::Node_pick_place::pick_area pick_area2;
+    std::vector<geometry_msgs::Point> place_points2;
+    pick_area2.position.x = -3;
+    pick_area2.position.y = 6;
+    pick_area2.height = 2;
+    pick_area2.width = 2;
+
+    point.x = 10;
+    point.y = 1;
+    place_points2.push_back(point);
+    point.x = 9;
+    point.y = 2;
+    place_points2.push_back(point);
+    point.x = 8;
+    point.y = 3;
+    place_points2.push_back(point);
+    point.x = 7;
+    point.y = 3;
+    place_points2.push_back(point);
+    point.x = 6;
+    point.y = 3;
+    place_points2.push_back(point);
+    point.x = 5;
+    point.y = 1;
+    place_points2.push_back(point);
+
+
+    std::shared_ptr<mission_handler_namespace::Node_pick_place> pp_1 = std::make_shared<mission_handler_namespace::Node_pick_place>("pick_place_1");
+    pp_1.get()->set_pick_area(pick_area);
+    pp_1.get()->set_place_positions(place_points);
+    std::shared_ptr<mission_handler_namespace::Node_pick_place> pp_2 = std::make_shared<mission_handler_namespace::Node_pick_place>("pick_place_2");
+    pp_2.get()->set_pick_area(pick_area2);
+    pp_2.get()->set_place_positions(place_points2);
+
+
+
+
+
+
+
+    
+    mission.add_start_node(pp_1);
+    mission.add_start_node(pp_2);
+
+
+    return;
+
+
     auction_msgs::task task;
     task.task_name = "moveTo2D";
 
