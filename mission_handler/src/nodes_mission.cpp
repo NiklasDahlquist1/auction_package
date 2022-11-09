@@ -274,35 +274,7 @@ void Node_pick_place::node_logic(const mission_handler_state& state)
         std::uniform_real_distribution<> dist_01(0.0, 1.0); // distribution
         if(dist_01(this->rng) < this->spawn_rate)
         {   
-            geometry_msgs::Point pick_point;
-            geometry_msgs::Point place_point;
-
-            pick_point.x = this->pick_area_task.position.x + this->pick_area_task.width * dist_01(this->rng);
-            pick_point.y = this->pick_area_task.position.y + this->pick_area_task.height * dist_01(this->rng);
-
-
-            std::uniform_int_distribution<> dist_place(0, this->place_points.size() - 1);
-            int place_point_index = dist_place(this->rng);
-            place_point.x = this->place_points[place_point_index].x;
-            place_point.y = this->place_points[place_point_index].y;
-
-
-
-            std::uniform_int_distribution<> dist_id(0, INT32_MAX);
-
-
-            auction_msgs::task task;
-            task.task_data = std::to_string(pick_point.x) + ";" + std::to_string(pick_point.y) + ";" +
-                             std::to_string(place_point.x) + ";" + std::to_string(place_point.y);
-            task.created_time = ros::Time::now();
-            task.creator_name = this->node_name;
-            task.task_ID = dist_id(this->rng);
-            task.reward = this->task_reward;
-            task.task_name = "pickPlace";
-
-            auction_msgs::taskArray tasks;
-            tasks.tasks.push_back(task);
-            state.add_task_pub.publish(tasks);
+            add_task(state);
         }
 
         
@@ -314,7 +286,15 @@ void Node_pick_place::node_logic(const mission_handler_state& state)
 
 void Node_pick_place::node_start_logic(const mission_handler_state& state)
 {
+    this->time_last_check = ros::Time::now().toSec();
     // we do nothing here?
+
+
+    // add start tasks
+    for(int i = 0; i < this->number_of_start_tasks; ++i)
+    {
+        add_task(state);
+    }
 
     // set current node state
     this->current_status = RUNNING;
@@ -353,10 +333,50 @@ void Node_pick_place::set_place_positions(const std::vector<geometry_msgs::Point
 {
     this->place_points = place_points;
 }
+void Node_pick_place::set_parameters(double spawn_interval, double spawn_rate, double task_reward, int number_of_start_tasks)
+{
+    this->spawn_interval = spawn_interval;
+    this->spawn_rate = spawn_rate;
+    this->task_reward = task_reward;
+
+    this->number_of_start_tasks = number_of_start_tasks;
+}
+
+
+void Node_pick_place::add_task(const mission_handler_state& state)
+{
+    geometry_msgs::Point pick_point;
+    geometry_msgs::Point place_point;
+
+    std::uniform_real_distribution<> dist_01(0.0, 1.0); // distribution
+
+    pick_point.x = this->pick_area_task.position.x + this->pick_area_task.width * dist_01(this->rng);
+    pick_point.y = this->pick_area_task.position.y + this->pick_area_task.height * dist_01(this->rng);
+
+
+    std::uniform_int_distribution<> dist_place(0, this->place_points.size() - 1);
+    int place_point_index = dist_place(this->rng);
+    place_point.x = this->place_points[place_point_index].x;
+    place_point.y = this->place_points[place_point_index].y;
 
 
 
+    std::uniform_int_distribution<> dist_id(0, INT32_MAX);
 
+
+    auction_msgs::task task;
+    task.task_data = std::to_string(pick_point.x) + ";" + std::to_string(pick_point.y) + ";" +
+                        std::to_string(place_point.x) + ";" + std::to_string(place_point.y);
+    task.created_time = ros::Time::now();
+    task.creator_name = this->node_name;
+    task.task_ID = dist_id(this->rng);
+    task.reward = this->task_reward;
+    task.task_name = "pickPlace";
+
+    auction_msgs::taskArray tasks;
+    tasks.tasks.push_back(task);
+    state.add_task_pub.publish(tasks);
+}
 
 
 

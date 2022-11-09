@@ -27,6 +27,10 @@
 
 
 
+
+#define MARKER_SIZE 2
+
+
 namespace task_visualization
 {
     std::vector<std::string> splitString(const std::string &strToSplit, char delimeter);
@@ -133,9 +137,9 @@ namespace task_visualization
         allAdded.pose.orientation.y = 0.0;
         allAdded.pose.orientation.z = 0.0;
         allAdded.pose.orientation.w = 1.0;
-        allAdded.scale.x = 0.75*0.3;
-        allAdded.scale.y = 0.75*0.3;
-        allAdded.scale.z = 0.4*0.3;
+        allAdded.scale.x = MARKER_SIZE;
+        allAdded.scale.y = MARKER_SIZE;
+        allAdded.scale.z = MARKER_SIZE;
         allAdded.color.a = 0.95;
         allAdded.color.r = 0.0;
         allAdded.color.g = 1.0;
@@ -206,9 +210,9 @@ namespace task_visualization
         allAdded.pose.orientation.y = 0.0;
         allAdded.pose.orientation.z = 0.0;
         allAdded.pose.orientation.w = 1.0;
-        allAdded.scale.x = 0.75*0.3;
-        allAdded.scale.y = 0.75*0.3;
-        allAdded.scale.z = 0.4*0.3;
+        allAdded.scale.x = MARKER_SIZE;
+        allAdded.scale.y = MARKER_SIZE;
+        allAdded.scale.z = MARKER_SIZE;
         allAdded.color.a = 0.95;
         allAdded.color.r = 1.0;
         allAdded.color.g = 0.0;
@@ -231,9 +235,9 @@ namespace task_visualization
         marker_blue.pose.orientation.y = 0.0;
         marker_blue.pose.orientation.z = 0.0;
         marker_blue.pose.orientation.w = 1.0;
-        marker_blue.scale.x = 0.75*0.3;
-        marker_blue.scale.y = 0.75*0.3;
-        marker_blue.scale.z = 0.4*0.3;
+        marker_blue.scale.x = MARKER_SIZE;
+        marker_blue.scale.y = MARKER_SIZE;
+        marker_blue.scale.z = MARKER_SIZE;
         marker_blue.color.a = 0.95;
         marker_blue.color.r = 0.0;
         marker_blue.color.g = 0.0;

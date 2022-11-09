@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-
+    <arg name="maxNumberOfBids" default="10"/>
 
     <node name="auction_server" type="auction_server" pkg="auction_server" output="screen">
-        <param name="auctionRoundTime" type="double" value="1.6"/>
+        <param name="auctionRoundTime" type="double" value="6.5"/>
         <param name="serverUpdateRate" type="double" value="100"/>
-        <param name="tasksAllocatedPerAgent" type="int" value="2"/>
-        <param name="maxNumberOfBids" type="int" value="4"/>
+        <param name="tasksAllocatedPerAgent" type="int" value="1"/>
+        <param name="maxNumberOfBids" type="int" value="$(arg maxNumberOfBids)"/>
     </node>
 
     <node name="auction_visualizer" type="visualizer" pkg="auction_server" output="screen">

@@ -18,42 +18,75 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 
-curves_optimization_time = [[],[],[]]
-curves_agents = [[],[],[]]
-curves_tasks = [[],[],[]]
-curves_connections = [[],[],[]]
+
+
+curves_optimization_time_fixed_agents = [[],[],[], [],[],[]]
+curves_agents_fixed_agents = [[],[],[], [],[],[]]
+curves_tasks_fixed_agents = [[],[],[], [],[],[]]
+curves_connections_fixed_agents = [[],[],[], [],[],[]]
+
+curves_optimization_time_fixed_tasks = [[],[],[], [],[],[]]
+curves_agents_fixed_tasks = [[],[],[], [],[],[]]
+curves_tasks_fixed_tasks = [[],[],[], [],[],[]]
+curves_connections_fixed_tasks = [[],[],[], [],[],[]]
 
 
 
+def curve_fixed_agents_0_CB(data : Float64MultiArray):
+    curves_optimization_time_fixed_agents[0].append(data.data[0])
+    curves_agents_fixed_agents[0].append(data.data[1])
+    curves_tasks_fixed_agents[0].append(data.data[2])
+    curves_connections_fixed_agents[0].append(data.data[3])
+    #print(data.data[0])
 
-def curve_0_CB(data : Float64MultiArray):
-    curves_optimization_time[0].append(data.data[0])
-    curves_agents[0].append(data.data[1])
-    curves_tasks[0].append(data.data[2])
-    curves_connections[0].append(data.data[3])
-    print(data.data[0])
-
-def curve_1_CB(data):
-    curves_optimization_time[1].append(data.data[0])
-    curves_agents[1].append(data.data[1])
-    curves_tasks[1].append(data.data[2])
-    curves_connections[1].append(data.data[3])
+def curve_fixed_agents_1_CB(data):
+    curves_optimization_time_fixed_agents[1].append(data.data[0])
+    curves_agents_fixed_agents[1].append(data.data[1])
+    curves_tasks_fixed_agents[1].append(data.data[2])
+    curves_connections_fixed_agents[1].append(data.data[3])
     #print(data.data[0])
 
 
-def curve_2_CB(data):
-    curves_optimization_time[2].append(data.data[0])
-    curves_agents[2].append(data.data[1])
-    curves_tasks[2].append(data.data[2])
-    curves_connections[2].append(data.data[3])
+def curve_fixed_agents_2_CB(data):
+    curves_optimization_time_fixed_agents[2].append(data.data[0])
+    curves_agents_fixed_agents[2].append(data.data[1])
+    curves_tasks_fixed_agents[2].append(data.data[2])
+    curves_connections_fixed_agents[2].append(data.data[3])
     #print(data.data[0])
 
+
+
+def curve_fixed_tasks_0_CB(data : Float64MultiArray):
+    curves_optimization_time_fixed_tasks[0].append(data.data[0])
+    curves_agents_fixed_tasks[0].append(data.data[1])
+    curves_tasks_fixed_tasks[0].append(data.data[2])
+    curves_connections_fixed_tasks[0].append(data.data[3])
+    #print(data.data[0])
+
+def curve_fixed_tasks_1_CB(data):
+    curves_optimization_time_fixed_tasks[1].append(data.data[0])
+    curves_agents_fixed_tasks[1].append(data.data[1])
+    curves_tasks_fixed_tasks[1].append(data.data[2])
+    curves_connections_fixed_tasks[1].append(data.data[3])
+    #print(data.data[0])
+
+
+def curve_fixed_tasks_2_CB(data):
+    curves_optimization_time_fixed_tasks[2].append(data.data[0])
+    curves_agents_fixed_tasks[2].append(data.data[1])
+    curves_tasks_fixed_tasks[2].append(data.data[2])
+    curves_connections_fixed_tasks[2].append(data.data[3])
+    #print(data.data[0])
 
 def callbacks():
     # setup subscribers
-    rospy.Subscriber("optimization_tester_result_0", Float64MultiArray, curve_0_CB)
-    rospy.Subscriber("optimization_tester_result_1", Float64MultiArray, curve_1_CB)
-    rospy.Subscriber("optimization_tester_result_2", Float64MultiArray, curve_2_CB)
+    rospy.Subscriber("optimization_tester_result_fixed_agents_0", Float64MultiArray, curve_fixed_agents_0_CB)
+    rospy.Subscriber("optimization_tester_result_fixed_agents_1", Float64MultiArray, curve_fixed_agents_1_CB)
+    rospy.Subscriber("optimization_tester_result_fixed_agents_2", Float64MultiArray, curve_fixed_agents_2_CB)
+
+    rospy.Subscriber("optimization_tester_result_fixed_tasks_0", Float64MultiArray, curve_fixed_tasks_0_CB)
+    rospy.Subscriber("optimization_tester_result_fixed_tasks_1", Float64MultiArray, curve_fixed_tasks_1_CB)
+    rospy.Subscriber("optimization_tester_result_fixed_tasks_2", Float64MultiArray, curve_fixed_tasks_2_CB)
 
     # collect data until enter is pressed
 
@@ -76,12 +109,12 @@ def plot2():
 
     #plt.rc('text', usetex=True) # gotta install latex for this
     plt.rcParams.update({
-    "text.usetex": False,
+    "text.usetex": True,
     "font.family": "serif",
     "font.serif": ["Computer Modern Roman"],
     #"ps.usedistiller" : "xpdf",
-    "font.size" : 13,
-    "axes.titlesize" : 16, #16
+    "font.size" : 15,
+    "axes.titlesize" : 19, #16
 })
 
 
@@ -92,8 +125,13 @@ def plot2():
 
     mpl.rcParams['legend.fontsize'] = 11
     #fig, ax1 = plt.plot#subplots(3, sharex=True)#, figsize=[4, 3])
-    fig = plt.figure()
-    ax = fig.gca()
+    fig_1 = plt.figure()
+    ax_1 = fig_1.gca()
+    ax_1.margins(x=0)
+
+    fig_2 = plt.figure()
+    ax_2 = fig_2.gca()
+    ax_2.margins(x=0)
 
 
     plot_color = [1, 1, 1]
@@ -126,9 +164,11 @@ def plot2():
 
 
     # plot all curves
-    for i in range(0, len(curves_connections)):
-        x = np.array(curves_connections[i])
-        y = np.array(curves_optimization_time[i])
+    for i in range(0, len(curves_connections_fixed_agents)):
+
+        #x = np.array(curves_connections[i])
+        x = np.array(curves_tasks_fixed_agents[i])
+        y = np.array(curves_optimization_time_fixed_agents[i])
         #z = np.array(curves_z[i])
         
         #t = np.array([tt.to_sec() - curves_t[i][0].to_sec() for tt in curves_t[i]])
@@ -136,15 +176,33 @@ def plot2():
 
         l_w = 1.1
         if(len(x) > 0):
-            ax.plot(x, y, label='SOLVER', linewidth=l_w)
+            ax_1.plot(x, y, label='SOLVER', linewidth=l_w)
+
+    for i in range(0, len(curves_connections_fixed_tasks)):
+
+        #x = np.array(curves_connections[i])
+        x = np.array(curves_agents_fixed_tasks[i])
+        y = np.array(curves_optimization_time_fixed_tasks[i])
+        #z = np.array(curves_z[i])
+        
+        #t = np.array([tt.to_sec() - curves_t[i][0].to_sec() for tt in curves_t[i]])
+        
+
+        l_w = 1.1
+        if(len(x) > 0):
+            ax_2.plot(x, y, label='SOLVER', linewidth=l_w)
 
 
-    #ax1.set_title('Lab experiment')
-    ax.set_title('Simulation')
-    ax.set_ylabel('Optimization time [ms]')
-    
+    ax_1.set_title('Optimization analysis, 50 agents')
+    ax_1.set_ylabel('Optimization time [ms]')
 
-    ax.set_xlabel('Connections')
+    ax_1.set_xlabel('Tasks [n]')
+
+
+    ax_2.set_title('Optimization analysis, 50 tasks')
+    ax_2.set_ylabel('Optimization time [ms]')
+
+    ax_2.set_xlabel('Agents [n]')
 
 
     # custom legends
@@ -158,11 +216,13 @@ def plot2():
                        #  label='Color Patch')]
 """
 
-    plt.legend(['CBC', 'CP-SAT', 'SCIP'], loc='best')
-
+    ax_1.legend(['30\% task participation', '60\% task participation', '90\% task participation'], loc='best')
+    ax_2.legend(['30\% task participation', '60\% task participation', '90\% task participation'], loc='best')
 
     #plt.savefig('optimization.eps') 
     #plt.savefig('optimization.png', dpi=600) 
+    fig_1.savefig('optimization_fixed_agents.eps') 
+    fig_2.savefig('optimization_fixed_tasks.eps') 
     plt.show()
 
 

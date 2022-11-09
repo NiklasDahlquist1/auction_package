@@ -25,9 +25,15 @@ class Optimization_tester
     ros::NodeHandle nodeHandle;
     ros::NodeHandle nodeHandle_private;
 
-    ros::Publisher result_0_publisher;
-    ros::Publisher result_1_publisher;
-    ros::Publisher result_2_publisher;
+    ros::Publisher result_fixed_agents_0_publisher;
+    ros::Publisher result_fixed_agents_1_publisher;
+    ros::Publisher result_fixed_agents_2_publisher;
+
+    ros::Publisher result_fixed_tasks_0_publisher;
+    ros::Publisher result_fixed_tasks_1_publisher;
+    ros::Publisher result_fixed_tasks_2_publisher;
+
+
     //parameters?
 
     int number_of_agents;
@@ -35,7 +41,7 @@ class Optimization_tester
     double optimization_connectivity_number;
 
 
-    double time_optimization(int number_of_agents, int number_of_tasks, double optimization_connectivity_number);
+    double time_optimization(int number_of_agents, int number_of_tasks, double optimization_connectivity_number, ros::Publisher& result_publisher);
 
 
 
@@ -49,6 +55,8 @@ class Optimization_tester
 
 
     void spin_loop(double loop_rate);
+
+    void task_loop();
 
 };
 

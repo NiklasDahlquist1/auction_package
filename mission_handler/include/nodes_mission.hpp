@@ -139,7 +139,7 @@ class Node_pick_place : public Node_base
 
     void set_pick_area(const pick_area& area);
     void set_place_positions(const std::vector<geometry_msgs::Point>& place_points);
-
+    void set_parameters(double spawn_interval, double spawn_rate, double task_reward, int number_of_start_tasks);
 
 
 
@@ -148,18 +148,20 @@ class Node_pick_place : public Node_base
     pick_area pick_area_task;
     std::vector<geometry_msgs::Point> place_points;
 
-    double spawn_interval = 0.1;
-    double spawn_rate = 0.5;
+    double spawn_interval = 0.1; // time between when the spawn logic runs
+    double spawn_rate = 0.5; // chance of adding a task when spawn logic runs
     double time_last_check = ros::Time::now().toSec();
     double time_accumulator = 0;
     double task_reward = 0;
 
 
+    int number_of_start_tasks = 0;
+
 
     std::random_device dev;
     std::mt19937 rng;
 
-
+    void add_task(const mission_handler_state& state);
 
 
 };

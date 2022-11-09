@@ -31,3 +31,6 @@ bool can_be_abandoned
 #float64 rewardIncrease # maybe make more general later?
 
 
+#bool use_increasing_reward_linear
+
+

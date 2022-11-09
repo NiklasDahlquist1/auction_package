@@ -61,7 +61,9 @@ namespace auction_ns
         if(auctionRunning)
         {
             double currentTime = ros::Time::now().toSec();
-            if(activeAuction.header.stamp.toSec() + auctionRoundTime <= currentTime || bidsCurrentAuction.size() >= this->maxNumberOfBids) //TODO
+            if((activeAuction.header.stamp.toSec() + auctionRoundTime <= currentTime || bidsCurrentAuction.size() >= this->maxNumberOfBids) && 
+                activeAuction.header.stamp.toSec() + 0.1 <= currentTime // force a minimum time between auctions?
+               ) //TODO
             {
                 declareWinner();
                 auctionRunning = false;

@@ -15,7 +15,7 @@ int main(int argc, char** argv)
 
 
 
-    client.spin_loop(50);
+    client.spin_loop(100);
 
 
 
