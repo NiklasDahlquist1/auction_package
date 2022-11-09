@@ -115,7 +115,7 @@ class Node_sync : public Node_base
 
 };
 
-
+// node for spawning pick and place tasks, a "station" where a ground agents comes to pick up items
 class Node_pick_place : public Node_base
 {
     public:
@@ -141,8 +141,6 @@ class Node_pick_place : public Node_base
     void set_place_positions(const std::vector<geometry_msgs::Point>& place_points);
     void set_parameters(double spawn_interval, double spawn_rate, double task_reward, int number_of_start_tasks);
 
-
-
     private:
 
     pick_area pick_area_task;
@@ -162,12 +160,66 @@ class Node_pick_place : public Node_base
     std::mt19937 rng;
 
     void add_task(const mission_handler_state& state);
+}; 
 
 
+// node for spawning pick and place tasks, multiple "stations" with a total maximum number of spawned tasks
+class Node_multiple_pick_place : public Node_base
+{
+    public:
+    using Node_base::Node_base;
+    Node_multiple_pick_place(const std::string& name) : Node_base::Node_base(name), rng(dev()) { }
+
+    void node_logic(const mission_handler_state& state);
+    void node_start_logic(const mission_handler_state& state);
+    bool ready_to_start_logic(const mission_handler_state& state);
+
+    node_status get_current_status();
+
+    struct spawn_parameters
+    {
+        double spawn_interval = 1; // time between when the spawn logic runs
+        double spawn_rate = 0.1; // chance of adding a task when spawn logic runs
+        double task_reward = 0;
+        int number_of_start_tasks = 0;
+        std::string station_name = "multi_station_pick_up";
+    };
+
+    struct pick_area
+    {
+        geometry_msgs::Point position;
+        double width;
+        double height;
+        std::vector<geometry_msgs::Point> place_points;
+        spawn_parameters parameters;
+
+        double time_last_check = ros::Time::now().toSec();
+        double time_accumulator = 0;
+
+    };
+    
+
+    void add_pick_area(const pick_area& area);
+    void set_max_active_tasks(int max);
+
+    private:
+    int max_number_of_active_tasks = 30;
+    //int current_number_of_active_tasks = 0;
+
+    std::vector<pick_area> pick_areas_task;
+    std::list<auction_msgs::task> added_tasks;
+
+
+    std::random_device dev;
+    std::mt19937 rng;
+
+    void add_task(const mission_handler_state& state, const pick_area& pick_area);
 };
 
 
-// node for spawning pick and place tasks, a "station" where a ground agents comes to pick up items
+
+
+
 
 
 class Node_tasks : public Node_base

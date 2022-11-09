@@ -28,7 +28,7 @@
 
 
 
-#define MARKER_SIZE 2
+#define MARKER_SIZE 0.7
 
 
 namespace task_visualization

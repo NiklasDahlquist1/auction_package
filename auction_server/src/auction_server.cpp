@@ -250,6 +250,11 @@ namespace auction_ns
         for(int j = 0; j < tasks_num; ++j)
         {
             rewards[j] = auctionForAssigning.tasks.tasks[j].reward;
+
+            if(auctionForAssigning.tasks.tasks[j].useIncreasingReward == true)
+            {
+                // add increasing reward here
+            }
         }
 
 
@@ -288,10 +293,41 @@ namespace auction_ns
             std::cout << std::endl;
         }*/
 
+
+        // generate constraint groups
+        int max_agents_per_group = 2; // make more general (it should be specific for each group)
+        // find number of different constrained_group_names
+        std::map<std::string, std::vector<int>> unique_groups; // hack to get unique names
+        for(int j = 0; j < tasks_num; ++j)
+        {
+            if(auctionForAssigning.tasks.tasks[j].constrained_group == true)
+            {
+                unique_groups[auctionForAssigning.tasks.tasks[j].constrained_group_name].push_back(j);
+            }
+        }
+
+        std::vector<std::vector<int>> constrain_groups;
+        //
+        //int index_group = 0;
+        for(const auto& group : unique_groups)
+        {
+            std::cout << "GROUP: " << group.first << " (total: " << group.second.size() << " tasks)" << "\n";
+            std::vector<int> list;
+            for(const int& task : group.second)
+            {
+                list.push_back(task);
+                // add reward based on group.second.size()
+                rewards[task] += 10000 * group.second.size();
+                std::cout << "\t" << task << " ";
+            }
+            std::cout << "\n";
+            constrain_groups.push_back(list);
+        }
+
         
         std::vector<std::vector<double>> winners(workers_num);
-        winners = operations_research::taskMatching(costs, rewards, this->tasksAllocatedPerAgent, "SCIP"); //use the matching optimization
-
+        winners = operations_research::taskMatching(costs, rewards, this->tasksAllocatedPerAgent, "SCIP", constrain_groups, 1); //use the matching optimization
+        
 
 
 

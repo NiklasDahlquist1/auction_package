@@ -386,6 +386,181 @@ void Node_pick_place::add_task(const mission_handler_state& state)
 
 
 
+///////////////////////// Node_multiuple_pick_place
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void Node_multiple_pick_place::node_logic(const mission_handler_state& state)
+{
+
+
+    // check state (finished tasks), and remove them from internal queue in that case
+
+    for(const auction_msgs::task& completed_task : state.completed_tasks)
+    {
+        // compare and check if the completed task exists in this nodes not completed tasks, if remove it from this node
+        for(const auction_msgs::task& internal_task : this->added_tasks)
+        {
+            if(completed_task == internal_task)
+            {
+                this->added_tasks.remove(internal_task);
+                break;
+            }
+        }
+    }
+
+
+    // increase time, check if we should add a task, create a task (with random pick/place position)
+
+    // do for each pick up place
+    for(auto& pp : this->pick_areas_task)
+    {
+        double dt = ros::Time::now().toSec() - pp.time_last_check;
+        pp.time_accumulator += dt;
+        pp.time_last_check = ros::Time::now().toSec();
+
+        
+
+
+
+        while(pp.time_accumulator > pp.parameters.spawn_interval)
+        //if(ros::Time::now().toSec() - this->time_last_check > spawn_interval) // very approximate, time error will accumulate over time. but who cares
+        {
+            std::cout << "TRYING TO SPAWN\n";
+            std::uniform_real_distribution<> dist_01(0.0, 1.0); // distribution
+            if(dist_01(this->rng) <= pp.parameters.spawn_rate)
+            {   
+                if(this->added_tasks.size() < this->max_number_of_active_tasks) // should be tested once somewhere else, but who cares. This is easier since all stations get their time accumulator reduces properly
+                {
+                    add_task(state, pp);
+                }
+            }
+            pp.time_accumulator -= pp.parameters.spawn_interval;
+        }
+    }
+}
+
+
+void Node_multiple_pick_place::node_start_logic(const mission_handler_state& state)
+{
+    for(auto& pp : this->pick_areas_task)
+    {
+        for(int i = 0; i < pp.parameters.number_of_start_tasks; ++i)
+        {
+            if(this->added_tasks.size() < this->max_number_of_active_tasks)
+            {
+                add_task(state, pp);
+            }
+        }
+        
+        pp.time_last_check = ros::Time::now().toSec();
+        pp.time_accumulator = 0;
+    }
+    
+    // we do nothing here?
+
+
+    // add start tasks
+
+
+    // set current node state
+    this->current_status = RUNNING;
+}
+
+
+bool Node_multiple_pick_place::ready_to_start_logic(const mission_handler_state& state)
+{
+    // if all parents are OK, this is ready to start.
+    // if number of parents = 0, also ready to start
+
+    bool ready = true;
+    for(const auto& parent : this->parents)
+    {
+        if(parent->get_current_status() != Node_base::node_status::COMPLETED)
+        {
+            ready = false;
+        }
+    }
+    return ready;
+}
+
+
+Node_base::node_status Node_multiple_pick_place::get_current_status()
+{
+    return this->current_status;
+}
+
+
+
+void Node_multiple_pick_place::add_pick_area(const Node_multiple_pick_place::pick_area& area)
+{
+    this->pick_areas_task.push_back(area);
+    // add function to remove area? maybe not relevant? (not now anyway)
+}
+
+void Node_multiple_pick_place::set_max_active_tasks(int max)
+{
+    this->max_number_of_active_tasks = max;
+}
+
+
+
+void Node_multiple_pick_place::add_task(const mission_handler_state& state, const pick_area& pick_area)
+{
+    geometry_msgs::Point pick_point;
+    geometry_msgs::Point place_point;
+
+    std::uniform_real_distribution<> dist_01(0.0, 1.0); // distribution
+
+    pick_point.x = pick_area.position.x + pick_area.width * dist_01(this->rng);
+    pick_point.y = pick_area.position.y + pick_area.height * dist_01(this->rng);
+
+
+    std::uniform_int_distribution<> dist_place(0, pick_area.place_points.size() - 1);
+    int place_point_index = dist_place(this->rng);
+    place_point.x = pick_area.place_points[place_point_index].x;
+    place_point.y = pick_area.place_points[place_point_index].y;
+
+
+
+    std::uniform_int_distribution<> dist_id(0, INT32_MAX);
+
+
+    auction_msgs::task task;
+    task.task_data = std::to_string(pick_point.x) + ";" + std::to_string(pick_point.y) + ";" +
+                        std::to_string(place_point.x) + ";" + std::to_string(place_point.y);
+    task.created_time = ros::Time::now();
+    task.creator_name = this->node_name;;
+    //task.task_type = "";
+    task.task_ID = dist_id(this->rng);
+    task.reward = pick_area.parameters.task_reward;
+    task.task_name = "pickPlace";
+    
+    task.constrained_group = true;
+    task.constrained_group_name = pick_area.parameters.station_name;
+
+
+    auction_msgs::taskArray tasks;
+    tasks.tasks.push_back(task);
+    state.add_task_pub.publish(tasks);
+
+    this->added_tasks.push_back(task);
+}
+
+
+
+
 
 
 
@@ -414,7 +589,7 @@ void Mission::add_start_node(std::shared_ptr<Node_base> start_node)
 void Mission::print_nodes()
 {
     int node_number = 0;
-    for(auto start_n : this->start_nodes)
+    for(const auto& start_n : this->start_nodes)
     {
         std::cout << "Mission start node number " << node_number++ << ": \n";
         std::stringstream stream;

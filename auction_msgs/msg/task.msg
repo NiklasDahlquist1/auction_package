@@ -27,10 +27,14 @@ bool can_be_abandoned
 
 
 
-#bool useIncreasingReward
+bool useIncreasingReward
 #float64 rewardIncrease # maybe make more general later?
 
-
 #bool use_increasing_reward_linear
+
+
+
+bool constrained_group # if true, this task will be included in the "all tasks with the same constrained_group_name will have < MAX number of assigned agents"
+string constrained_group_name
 
 
