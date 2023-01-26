@@ -226,6 +226,7 @@ namespace auction_ns
             {
                 agentsThatWasAllocated.push_back(t.allocatedTo);
             }
+            
             // we set all tasks that are up for auctioning to be "not allocated"
             t.allocated = false;
             t.allocatedTo = "";
@@ -247,6 +248,7 @@ namespace auction_ns
 
         // create rewards vector
         std::vector<double> rewards(tasks_num);
+        double time_now = ros::Time::now().toSec();
         for(int j = 0; j < tasks_num; ++j)
         {
             rewards[j] = auctionForAssigning.tasks.tasks[j].reward;
@@ -254,6 +256,9 @@ namespace auction_ns
             if(auctionForAssigning.tasks.tasks[j].useIncreasingReward == true)
             {
                 // add increasing reward here
+                double time_since_added = time_now - auctionForAssigning.tasks.tasks[j].created_time.toSec();
+                //std::cout << "time since added for task " << j << ": " << time_since_added << ".\n";
+                //rewards[j] += 100 * time_since_added;
             }
         }
 
@@ -271,6 +276,7 @@ namespace auction_ns
                     {
                         pairFound = true;
                         costs[i][j] = price.price;
+
                         break;
                     }
                     if(pairFound == false)
@@ -295,7 +301,7 @@ namespace auction_ns
 
 
         // generate constraint groups
-        int max_agents_per_group = 2; // make more general (it should be specific for each group)
+        int max_agents_per_group = 3; // make more general (it should be specific for each group)
         // find number of different constrained_group_names
         std::map<std::string, std::vector<int>> unique_groups; // hack to get unique names
         for(int j = 0; j < tasks_num; ++j)
@@ -317,7 +323,7 @@ namespace auction_ns
             {
                 list.push_back(task);
                 // add reward based on group.second.size()
-                rewards[task] += 10000 * group.second.size();
+                //rewards[task] += 10000 * group.second.size();
                 std::cout << "\t" << task << " ";
             }
             std::cout << "\n";
@@ -326,7 +332,7 @@ namespace auction_ns
 
         
         std::vector<std::vector<double>> winners(workers_num);
-        winners = operations_research::taskMatching(costs, rewards, this->tasksAllocatedPerAgent, "SCIP", constrain_groups, 1); //use the matching optimization
+        winners = operations_research::taskMatching(costs, rewards, this->tasksAllocatedPerAgent, "SCIP", constrain_groups, max_agents_per_group); //use the matching optimization
         
 
 

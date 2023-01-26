@@ -18,11 +18,11 @@ void rvizPointCB(const geometry_msgs::PointStamped& msg)
 {
     auction_msgs::task task;
     task.task_name = "moveTo2D";
-    task.task_data = std::to_string(msg.point.x) + ";" + std::to_string(msg.point.y) + ";" + std::to_string(/*msg.point.z*/3.5);
+    task.task_data = std::to_string(msg.point.x) + ";" + std::to_string(msg.point.y) + ";" + std::to_string(msg.point.z);
 
     task.task_ID = task_ID;
     task_ID++;
-    task.reward = 10000;
+    task.reward = 0;
     task.created_time = ros::Time::now();
 //    task.use_increasing_reward_linear = true;
 

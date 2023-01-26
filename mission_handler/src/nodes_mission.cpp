@@ -423,6 +423,10 @@ void Node_multiple_pick_place::node_logic(const mission_handler_state& state)
 
     // increase time, check if we should add a task, create a task (with random pick/place position)
 
+
+    // loop through vector in random order
+    std::random_shuffle (this->pick_areas_task.begin(), this->pick_areas_task.end() );  // in place no extra array
+
     // do for each pick up place
     for(auto& pp : this->pick_areas_task)
     {
@@ -437,7 +441,7 @@ void Node_multiple_pick_place::node_logic(const mission_handler_state& state)
         while(pp.time_accumulator > pp.parameters.spawn_interval)
         //if(ros::Time::now().toSec() - this->time_last_check > spawn_interval) // very approximate, time error will accumulate over time. but who cares
         {
-            std::cout << "TRYING TO SPAWN\n";
+            //std::cout << "TRYING TO SPAWN\n";
             std::uniform_real_distribution<> dist_01(0.0, 1.0); // distribution
             if(dist_01(this->rng) <= pp.parameters.spawn_rate)
             {   
@@ -453,7 +457,7 @@ void Node_multiple_pick_place::node_logic(const mission_handler_state& state)
 
 
 void Node_multiple_pick_place::node_start_logic(const mission_handler_state& state)
-{
+{    
     for(auto& pp : this->pick_areas_task)
     {
         for(int i = 0; i < pp.parameters.number_of_start_tasks; ++i)
@@ -467,6 +471,7 @@ void Node_multiple_pick_place::node_start_logic(const mission_handler_state& sta
         pp.time_last_check = ros::Time::now().toSec();
         pp.time_accumulator = 0;
     }
+
     
     // we do nothing here?
 
@@ -547,8 +552,12 @@ void Node_multiple_pick_place::add_task(const mission_handler_state& state, cons
     task.reward = pick_area.parameters.task_reward;
     task.task_name = "pickPlace";
     
-    task.constrained_group = true;
+    task.constrained_group = pick_area.parameters.use_constrain_groups;
     task.constrained_group_name = pick_area.parameters.station_name;
+
+
+    // should we consider time here?
+    task.useIncreasingReward = pick_area.parameters.use_increasing_reward;
 
 
     auction_msgs::taskArray tasks;

@@ -183,6 +183,9 @@ class Node_multiple_pick_place : public Node_base
         double task_reward = 0;
         int number_of_start_tasks = 0;
         std::string station_name = "multi_station_pick_up";
+
+        bool use_constrain_groups = true;
+        bool use_increasing_reward = true;
     };
 
     struct pick_area

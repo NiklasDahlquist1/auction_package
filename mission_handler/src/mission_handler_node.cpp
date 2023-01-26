@@ -4,6 +4,11 @@
 
 void create_mission(mission_handler_namespace::Mission& mission, const std::string& root_name);
 void mission_scenario_easy_ifac(mission_handler_namespace::Mission& mission, const std::string& root_name);
+void mission_scenario_big_ifac(mission_handler_namespace::Mission& mission, const std::string& root_name);
+void mission_scenario_final_ifac(mission_handler_namespace::Mission& mission, const std::string& root_name);
+void abb_demo_mission(mission_handler_namespace::Mission& mission, const std::string& root_name);
+
+
 
 
 int main(int argc, char** argv)
@@ -19,8 +24,11 @@ int main(int argc, char** argv)
     
     
     //create_mission(mission, "root_1");
-    mission_scenario_easy_ifac(mission, "root_1");
-    
+    //mission_scenario_easy_ifac(mission, "easy_scenario");
+    //mission_scenario_big_ifac(mission, "big_map");
+    //mission_scenario_final_ifac(mission, "final_scenario");
+
+    abb_demo_mission(mission, "abb_demo");
     
     mission.print_nodes();
     //std::stringstream stream;
@@ -313,30 +321,30 @@ void mission_scenario_easy_ifac(mission_handler_namespace::Mission& mission, con
     pick_area_1.position.y = -20;
     pick_area_1.height = 5;
     pick_area_1.width = 5;
-    pick_area_1.parameters.number_of_start_tasks = 10;
+    pick_area_1.parameters.number_of_start_tasks = 0;
     pick_area_1.parameters.station_name = "station_1";
     pick_area_1.parameters.spawn_interval = 1;
-    pick_area_1.parameters.spawn_rate = 0;
+    pick_area_1.parameters.spawn_rate = 0.05;
     pick_area_1.parameters.task_reward = 0;
 
     pick_area_2.position.x = 10;
-    pick_area_2.position.y = -5;
+    pick_area_2.position.y = -2.5;
     pick_area_2.height = 5;
     pick_area_2.width = 5;
-    pick_area_2.parameters.number_of_start_tasks = 10;
+    pick_area_2.parameters.number_of_start_tasks = 0;
     pick_area_2.parameters.station_name = "station_2";
     pick_area_2.parameters.spawn_interval = 1;
-    pick_area_2.parameters.spawn_rate = 0.0;
+    pick_area_2.parameters.spawn_rate = 0.15;
     pick_area_2.parameters.task_reward = 0;
 
     pick_area_3.position.x = 10;
     pick_area_3.position.y = 15;
     pick_area_3.height = 5;
     pick_area_3.width = 5;
-    pick_area_3.parameters.number_of_start_tasks = 10;
+    pick_area_3.parameters.number_of_start_tasks = 0;
     pick_area_3.parameters.station_name = "station_3";
     pick_area_3.parameters.spawn_interval = 1;
-    pick_area_3.parameters.spawn_rate = 0.0;
+    pick_area_3.parameters.spawn_rate = 0.15;
     pick_area_3.parameters.task_reward = 0;
 
     std::vector<geometry_msgs::Point> place_points;
@@ -371,7 +379,7 @@ void mission_scenario_easy_ifac(mission_handler_namespace::Mission& mission, con
     pp_1.get()->add_pick_area(pick_area_2);
     pp_1.get()->add_pick_area(pick_area_3);
 
-    pp_1.get()->set_max_active_tasks(30);
+    pp_1.get()->set_max_active_tasks(40);
 
 
 
@@ -381,8 +389,299 @@ void mission_scenario_easy_ifac(mission_handler_namespace::Mission& mission, con
 
     mission.add_start_node(pp_1);
     return;
-
-
 }
+
+
+
+
+
+void mission_scenario_final_ifac(mission_handler_namespace::Mission& mission, const std::string& root_name)
+{
+    mission_handler_namespace::Node_multiple_pick_place::pick_area pick_area_1;
+    mission_handler_namespace::Node_multiple_pick_place::pick_area pick_area_2;
+    mission_handler_namespace::Node_multiple_pick_place::pick_area pick_area_3;
+
+    pick_area_1.position.x = -13;
+    pick_area_1.position.y = -12;
+    pick_area_1.height = 5;
+    pick_area_1.width = 5;
+    pick_area_1.parameters.number_of_start_tasks = 0;
+    pick_area_1.parameters.station_name = "station_1";
+    pick_area_1.parameters.spawn_interval = 1;
+    pick_area_1.parameters.spawn_rate = 0.05;
+    pick_area_1.parameters.task_reward = 0;
+
+    pick_area_2.position.x = -2.5;
+    pick_area_2.position.y = -12;
+    pick_area_2.height = 5;
+    pick_area_2.width = 5;
+    pick_area_2.parameters.number_of_start_tasks = 0;
+    pick_area_2.parameters.station_name = "station_2";
+    pick_area_2.parameters.spawn_interval = 1;
+    pick_area_2.parameters.spawn_rate = 0.15;
+    pick_area_2.parameters.task_reward = 0;
+
+    pick_area_3.position.x = 7;
+    pick_area_3.position.y = -12;
+    pick_area_3.height = 5;
+    pick_area_3.width = 5;
+    pick_area_3.parameters.number_of_start_tasks = 0;
+    pick_area_3.parameters.station_name = "station_3";
+    pick_area_3.parameters.spawn_interval = 1;
+    pick_area_3.parameters.spawn_rate = 0.15;
+    pick_area_3.parameters.task_reward = 0;
+
+    std::vector<geometry_msgs::Point> place_points;
+    geometry_msgs::Point point;
+    point.x = -10;
+    point.y = 4;
+    place_points.push_back(point);
+    point.x = -1;
+    point.y = 11;
+    place_points.push_back(point);
+    point.x = 8.5;
+    point.y = 11.5;
+    place_points.push_back(point);
+/*    point.x = -15;
+    point.y = -5;
+    place_points.push_back(point);
+    point.x = -15;
+    point.y = 0;
+    place_points.push_back(point);
+    point.x = -15;
+    point.y = 5;
+    place_points.push_back(point);
+*/
+
+    pick_area_1.place_points = place_points;
+    pick_area_2.place_points = place_points;
+    pick_area_3.place_points = place_points;
+
+
+    std::shared_ptr<mission_handler_namespace::Node_multiple_pick_place> pp_1 = std::make_shared<mission_handler_namespace::Node_multiple_pick_place>("MULTI_PICK_PLACE_1");
+    pp_1.get()->add_pick_area(pick_area_1);
+    pp_1.get()->add_pick_area(pick_area_2);
+    pp_1.get()->add_pick_area(pick_area_3);
+
+    pp_1.get()->set_max_active_tasks(40);
+
+
+
+
+
+
+
+    mission.add_start_node(pp_1);
+    return;
+}
+
+
+
+
+
+
+
+void mission_scenario_big_ifac(mission_handler_namespace::Mission& mission, const std::string& root_name)
+{
+    mission_handler_namespace::Node_multiple_pick_place::pick_area pick_area_1;
+    mission_handler_namespace::Node_multiple_pick_place::pick_area pick_area_2;
+    mission_handler_namespace::Node_multiple_pick_place::pick_area pick_area_3;
+    mission_handler_namespace::Node_multiple_pick_place::pick_area pick_area_4;
+
+    pick_area_1.position.x = 23;
+    pick_area_1.position.y = -42;
+    pick_area_1.height = 4;
+    pick_area_1.width = 4;
+    pick_area_1.parameters.number_of_start_tasks = 5;
+    pick_area_1.parameters.station_name = "station_1";
+    pick_area_1.parameters.spawn_interval = 2;
+    pick_area_1.parameters.spawn_rate = 0.0;
+    pick_area_1.parameters.task_reward = 0;
+
+    pick_area_2.position.x = 27;
+    pick_area_2.position.y = -42;
+    pick_area_2.height = 4;
+    pick_area_2.width = 4;
+    pick_area_2.parameters.number_of_start_tasks = 5;
+    pick_area_2.parameters.station_name = "station_2";
+    pick_area_2.parameters.spawn_interval = 2;
+    pick_area_2.parameters.spawn_rate = 0.0;
+    pick_area_2.parameters.task_reward = 0;
+
+    pick_area_3.position.x = 36.5;
+    pick_area_3.position.y = 123;
+    pick_area_3.height = 4;
+    pick_area_3.width = 4;
+    pick_area_3.parameters.number_of_start_tasks = 5;
+    pick_area_3.parameters.station_name = "station_3";
+    pick_area_3.parameters.spawn_interval = 2;
+    pick_area_3.parameters.spawn_rate = 0.0;
+    pick_area_3.parameters.task_reward = 0;
+
+    pick_area_4.position.x = 40.5;
+    pick_area_4.position.y = 123;
+    pick_area_4.height = 4;
+    pick_area_4.width = 4;
+    pick_area_4.parameters.number_of_start_tasks = 5;
+    pick_area_4.parameters.station_name = "station_4";
+    pick_area_4.parameters.spawn_interval = 2;
+    pick_area_4.parameters.spawn_rate = 0.0;
+    pick_area_4.parameters.task_reward = 0;
+
+
+
+
+    std::vector<geometry_msgs::Point> place_points;
+    geometry_msgs::Point point;
+    point.x = -15;
+    point.y = -31.5;
+    place_points.push_back(point);
+    point.x = -38;
+    point.y = 6.9;
+    place_points.push_back(point);
+    point.x = -30.8;
+    point.y = 32.2;
+    place_points.push_back(point);
+    point.x = -18.9;
+    point.y = 31.9;
+    place_points.push_back(point);
+    point.x = 5;
+    point.y = 33;
+    place_points.push_back(point);
+    point.x = 41;
+    point.y = 58;
+    place_points.push_back(point);
+    point.x = 41;
+    point.y = 78.5;
+    place_points.push_back(point);
+    point.x = 40.5;
+    point.y = 99;
+    place_points.push_back(point);
+    point.x = -34.5;
+    point.y = 139.5;
+    place_points.push_back(point);
+
+
+    pick_area_1.place_points = place_points;
+    pick_area_2.place_points = place_points;
+    pick_area_3.place_points = place_points;
+    pick_area_4.place_points = place_points;
+
+
+    std::shared_ptr<mission_handler_namespace::Node_multiple_pick_place> pp_1 = std::make_shared<mission_handler_namespace::Node_multiple_pick_place>("MULTI_PICK_PLACE_1");
+    pp_1.get()->add_pick_area(pick_area_1);
+    pp_1.get()->add_pick_area(pick_area_2);
+    pp_1.get()->add_pick_area(pick_area_3);
+    pp_1.get()->add_pick_area(pick_area_4);
+
+    //pp_1.get()->add_pick_area(pick_area_3);
+
+    pp_1.get()->set_max_active_tasks(20);
+
+
+
+
+
+
+
+    mission.add_start_node(pp_1);
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void abb_demo_mission(mission_handler_namespace::Mission& mission, const std::string& root_name)
+{
+    mission_handler_namespace::Node_multiple_pick_place::pick_area pick_area_1;
+    mission_handler_namespace::Node_multiple_pick_place::pick_area pick_area_2;
+
+
+    pick_area_1.position.x = 1;
+    pick_area_1.position.y = 0.7;
+    pick_area_1.height = 0.75;
+    pick_area_1.width = 0.75;
+    pick_area_1.parameters.number_of_start_tasks = 0;
+    pick_area_1.parameters.station_name = "station_1";
+    pick_area_1.parameters.spawn_interval = 0.5;
+    pick_area_1.parameters.spawn_rate = 0.04;
+    pick_area_1.parameters.task_reward = 0;
+
+    pick_area_2.position.x = -2.9;
+    pick_area_2.position.y = -1.45;
+    pick_area_2.height = 0.5;
+    pick_area_2.width = 0.5;
+    pick_area_2.parameters.number_of_start_tasks = 0;
+    pick_area_2.parameters.station_name = "station_2";
+    pick_area_2.parameters.spawn_interval = 0.5;
+    pick_area_2.parameters.spawn_rate = 0.04;
+    pick_area_2.parameters.task_reward = 0;
+
+
+
+    std::vector<geometry_msgs::Point> place_points;
+    geometry_msgs::Point point;
+    point.x = -2.35;
+    point.y = 0.58;
+    place_points.push_back(point);
+    point.x = 1.1;
+    point.y = -1.1;
+    place_points.push_back(point);
+    point.x = -1.6;
+    point.y = 2.15;
+    place_points.push_back(point);
+/*    point.x = -15;
+    point.y = -5;
+    place_points.push_back(point);
+    point.x = -15;
+    point.y = 0;
+    place_points.push_back(point);
+    point.x = -15;
+    point.y = 5;
+    place_points.push_back(point);
+*/
+
+
+
+    pick_area_1.place_points = place_points;
+    pick_area_2.place_points = place_points;
+
+
+    std::shared_ptr<mission_handler_namespace::Node_multiple_pick_place> pp_1 = std::make_shared<mission_handler_namespace::Node_multiple_pick_place>("ABB_PICK_PLACE_MISSION");
+    pp_1.get()->add_pick_area(pick_area_1);
+    pp_1.get()->add_pick_area(pick_area_2);
+
+
+
+    pp_1.get()->set_max_active_tasks(20);
+
+
+
+
+
+
+
+    mission.add_start_node(pp_1);
+    return;
+}
+
+
+
+
+
+
+
+
+
 
 

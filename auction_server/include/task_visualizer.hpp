@@ -28,7 +28,8 @@
 
 
 
-#define MARKER_SIZE 0.7
+#define MARKER_SIZE 0.15
+#define MARKER_HEIGHT 0.2
 
 
 namespace task_visualization
@@ -158,13 +159,13 @@ namespace task_visualization
     {
 
         // all not finished
-        visualization_msgs::Marker allAdded;
-        
+        visualization_msgs::Marker marker_red;
         visualization_msgs::Marker marker_blue;
-
+        visualization_msgs::Marker marker_orange;
 
         std::vector<geometry_msgs::Point> task_blue;
-        std::vector<geometry_msgs::Point> task_pos;
+        std::vector<geometry_msgs::Point> task_red;
+        std::vector<geometry_msgs::Point> task_orange;
 
         for(auto pair : tasksCurrentlyNotFinished)
         {
@@ -175,7 +176,7 @@ namespace task_visualization
                 point.x = std::stod(parts[0]);
                 point.y = std::stod(parts[1]);
                 point.z = std::stod(parts[2]);
-                task_pos.push_back(point);
+                task_orange.push_back(point);
             }
             else if(pair.second.task_name == "pickPlace")
             {
@@ -185,7 +186,7 @@ namespace task_visualization
                 pick_point.x = std::stod(parts[0]);
                 pick_point.y = std::stod(parts[1]);
                 pick_point.z = 0;
-                task_pos.push_back(pick_point);
+                task_red.push_back(pick_point);
 
                 geometry_msgs::Point place_point;
                 place_point.x = std::stod(parts[2]);
@@ -196,36 +197,61 @@ namespace task_visualization
             }
 
         }
-        //allAdded.lifetime
-        allAdded.header.frame_id = "world";
-        allAdded.header.stamp = ros::Time::now();
-        allAdded.ns = "auction_visualizer";
-        allAdded.id = 1;
-        allAdded.type = visualization_msgs::Marker::CUBE_LIST;
-        allAdded.action = visualization_msgs::Marker::ADD;
-        allAdded.pose.position.x = 0;
-        allAdded.pose.position.y = 0;
-        allAdded.pose.position.z = 0;
-        allAdded.pose.orientation.x = 0.0;
-        allAdded.pose.orientation.y = 0.0;
-        allAdded.pose.orientation.z = 0.0;
-        allAdded.pose.orientation.w = 1.0;
-        allAdded.scale.x = MARKER_SIZE;
-        allAdded.scale.y = MARKER_SIZE;
-        allAdded.scale.z = MARKER_SIZE;
-        allAdded.color.a = 0.95;
-        allAdded.color.r = 1.0;
-        allAdded.color.g = 0.0;
-        allAdded.color.b = 0.0;
-        allAdded.points = task_pos;
-        tasksNotFinished_pub.publish(allAdded);
+        //marker_red.lifetime
+        marker_red.header.frame_id = "world";
+        marker_red.header.stamp = ros::Time::now();
+        marker_red.ns = "auction_visualizer";
+        marker_red.id = 1;
+        marker_red.type = visualization_msgs::Marker::CUBE_LIST;
+        marker_red.action = visualization_msgs::Marker::ADD;
+        marker_red.pose.position.x = 0;
+        marker_red.pose.position.y = 0;
+        marker_red.pose.position.z = 0;
+        marker_red.pose.orientation.x = 0.0;
+        marker_red.pose.orientation.y = 0.0;
+        marker_red.pose.orientation.z = 0.0;
+        marker_red.pose.orientation.w = 1.0;
+        marker_red.scale.x = MARKER_SIZE;
+        marker_red.scale.y = MARKER_SIZE;
+        marker_red.scale.z = MARKER_SIZE;
+        marker_red.color.a = 0.95;
+        marker_red.color.r = 1.0;
+        marker_red.color.g = 0.0;
+        marker_red.color.b = 0.0;
+        marker_red.points = task_red;
+        tasksNotFinished_pub.publish(marker_red);
+
+
+
+        marker_orange.header.frame_id = "world";
+        marker_orange.header.stamp = ros::Time::now();
+        marker_orange.ns = "auction_visualizer";
+        marker_orange.id = 2;
+        marker_orange.type = visualization_msgs::Marker::CUBE_LIST;
+        marker_orange.action = visualization_msgs::Marker::ADD;
+        marker_orange.pose.position.x = 0;
+        marker_orange.pose.position.y = 0;
+        marker_orange.pose.position.z = 0;
+        marker_orange.pose.orientation.x = 0.0;
+        marker_orange.pose.orientation.y = 0.0;
+        marker_orange.pose.orientation.z = 0.0;
+        marker_orange.pose.orientation.w = 1.0;
+        marker_orange.scale.x = MARKER_SIZE;
+        marker_orange.scale.y = MARKER_SIZE;
+        marker_orange.scale.z = MARKER_SIZE;
+        marker_orange.color.a = 0.95;
+        marker_orange.color.r = 1.0;
+        marker_orange.color.g = 0.5;
+        marker_orange.color.b = 0.0;
+        marker_orange.points = task_orange;
+        tasksNotFinished_pub.publish(marker_orange);
 
 
 
         marker_blue.header.frame_id = "world";
         marker_blue.header.stamp = ros::Time::now();
         marker_blue.ns = "auction_visualizer";
-        marker_blue.id = 2;
+        marker_blue.id = 3;
         marker_blue.type = visualization_msgs::Marker::CUBE_LIST;
         marker_blue.action = visualization_msgs::Marker::ADD;
         marker_blue.pose.position.x = 0;
