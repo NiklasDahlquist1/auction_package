@@ -404,6 +404,8 @@ void Node_pick_place::add_task(const mission_handler_state& state)
 void Node_multiple_pick_place::node_logic(const mission_handler_state& state)
 {
 
+    static int num_tasks_spawned_total = 0;
+
 
     // check state (finished tasks), and remove them from internal queue in that case
 
@@ -423,6 +425,13 @@ void Node_multiple_pick_place::node_logic(const mission_handler_state& state)
 
     // increase time, check if we should add a task, create a task (with random pick/place position)
 
+    // TODO: remove or make correctly. hack to kill after specific number of tasks (for the abb demo)
+    if(num_tasks_spawned_total >= 15)
+    {
+        std::cout << "total number of tasks: " << num_tasks_spawned_total << "\n";
+        return;
+        //double crash = 1 / 0;
+    }
 
     // loop through vector in random order
     std::random_shuffle (this->pick_areas_task.begin(), this->pick_areas_task.end() );  // in place no extra array
@@ -448,11 +457,15 @@ void Node_multiple_pick_place::node_logic(const mission_handler_state& state)
                 if(this->added_tasks.size() < this->max_number_of_active_tasks) // should be tested once somewhere else, but who cares. This is easier since all stations get their time accumulator reduces properly
                 {
                     add_task(state, pp);
+                    num_tasks_spawned_total += 1;
                 }
             }
             pp.time_accumulator -= pp.parameters.spawn_interval;
         }
     }
+
+
+
 }
 
 

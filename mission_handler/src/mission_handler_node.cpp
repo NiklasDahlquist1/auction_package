@@ -607,20 +607,20 @@ void abb_demo_mission(mission_handler_namespace::Mission& mission, const std::st
     mission_handler_namespace::Node_multiple_pick_place::pick_area pick_area_2;
 
 
-    pick_area_1.position.x = 1;
-    pick_area_1.position.y = 0.7;
-    pick_area_1.height = 0.75;
-    pick_area_1.width = 0.75;
+    pick_area_1.position.x = 1.2;
+    pick_area_1.position.y = 1.75;
+    pick_area_1.height = 0.9;
+    pick_area_1.width = 0.9;
     pick_area_1.parameters.number_of_start_tasks = 0;
     pick_area_1.parameters.station_name = "station_1";
     pick_area_1.parameters.spawn_interval = 0.5;
     pick_area_1.parameters.spawn_rate = 0.04;
     pick_area_1.parameters.task_reward = 0;
 
-    pick_area_2.position.x = -2.9;
-    pick_area_2.position.y = -1.45;
-    pick_area_2.height = 0.5;
-    pick_area_2.width = 0.5;
+    pick_area_2.position.x = -1.9;
+    pick_area_2.position.y = 0.9;
+    pick_area_2.height = 0.9;
+    pick_area_2.width = 0.9;
     pick_area_2.parameters.number_of_start_tasks = 0;
     pick_area_2.parameters.station_name = "station_2";
     pick_area_2.parameters.spawn_interval = 0.5;
@@ -631,19 +631,19 @@ void abb_demo_mission(mission_handler_namespace::Mission& mission, const std::st
 
     std::vector<geometry_msgs::Point> place_points;
     geometry_msgs::Point point;
-    point.x = -2.35;
-    point.y = 0.58;
+    point.x = -2.1;
+    point.y = 3.2;
     place_points.push_back(point);
-    point.x = 1.1;
-    point.y = -1.1;
+    point.x = -2.1;
+    point.y = 5.4;
     place_points.push_back(point);
-    point.x = -1.6;
-    point.y = 2.15;
+    point.x = 1.9;
+    point.y = 5.4;
+    place_points.push_back(point);
+    point.x = 1.6;
+    point.y = 4.25;
     place_points.push_back(point);
 /*    point.x = -15;
-    point.y = -5;
-    place_points.push_back(point);
-    point.x = -15;
     point.y = 0;
     place_points.push_back(point);
     point.x = -15;
@@ -663,7 +663,7 @@ void abb_demo_mission(mission_handler_namespace::Mission& mission, const std::st
 
 
 
-    pp_1.get()->set_max_active_tasks(20);
+    pp_1.get()->set_max_active_tasks(15);
 
 
 
